@@ -11,7 +11,7 @@
 A very chill developer simulator, with lo-fi music generated live in your browser.
 
 ### Lo-fi radio
-The page opens on the radio: eight stations, each with its own groove and illustrated scene (rainy city, morning coffee, beach at sunset, deep space, 8-bit sunset, forest cabin, winter snow, midnight train). Adjust music and rain, and leave it on while you work. **Enter the game** takes you to the office.
+The page opens on the radio: twelve stations, each with its own groove and illustrated scene (rainy city, morning coffee, beach at sunset, deep space, 8-bit sunset, forest cabin, winter snow, midnight train, anime sunset, garage rock, jazz club, synthwave). Adjust music, rain and vinyl crackle, and leave it on while you work. **Enter the game** takes you to the office.
 
 ### The game
 - Walk around your office, sit at your desk, and every key you press writes code. Prefer not to mash keys? Turn on **Auto-code** and watch the timer.
@@ -31,7 +31,7 @@ The language (Italian or English) is picked automatically from your browser.
 Un simulatore di sviluppatore molto rilassato, con musica lo-fi generata dal vivo nel browser.
 
 ### Radio lo-fi
-La pagina si apre sulla radio: otto stazioni, ognuna con il suo ritmo e la sua scena illustrata (città sotto la pioggia, caffè del mattino, spiaggia al tramonto, spazio, tramonto a 8 bit, baita nel bosco, neve, treno di mezzanotte). Si regolano musica e pioggia, e si può lasciare accesa mentre si lavora. Con **Entra nel gioco** si passa all'ufficio.
+La pagina si apre sulla radio: dodici stazioni, ognuna con il suo ritmo e la sua scena illustrata (città sotto la pioggia, caffè del mattino, spiaggia al tramonto, spazio, tramonto a 8 bit, baita nel bosco, neve, treno di mezzanotte, tramonto anime, garage rock, jazz club, synthwave). Si regolano musica, pioggia e fruscio del vinile, e si può lasciare accesa mentre si lavora. Con **Entra nel gioco** si passa all'ufficio.
 
 ### Il gioco
 - Cammini per l'ufficio, ti siedi alla scrivania e ogni tasto scrive codice. Non hai voglia di pestare i tasti? Accendi l'**Auto-code** e guarda il timer.
