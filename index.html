@@ -81,6 +81,10 @@ button:disabled { opacity: .42; cursor: not-allowed; }
 button.small { font-size: .82rem; padding: 5px 10px; border-radius: 9px; }
 button.primary { background: var(--warm); color: var(--warm-ink); border-color: var(--warm); font-weight: 600; }
 button.ghost { background: transparent; }
+a.linkbtn { font-size: .82rem; padding: 5px 10px; border-radius: 9px; border: 1px solid var(--line); background: var(--panel-2); color: var(--ink); text-decoration: none; white-space: nowrap; transition: border-color .15s; }
+a.linkbtn:hover { border-color: color-mix(in srgb, var(--warm) 70%, var(--line)); }
+a.linkbtn:focus-visible { outline: 2px solid var(--warm); outline-offset: 2px; }
+a.linkbtn b { font-weight: 600; color: var(--warm); margin-left: 4px; font-variant-numeric: tabular-nums; }
 .iconbtn { white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; font-size: .86rem; padding: 6px 10px; }
 .iconbtn svg { width: 17px; height: 17px; flex: none; }
 a.iconbtn { color: var(--muted); text-decoration: none; border: 1px solid var(--line); border-radius: 10px; background: var(--panel-2); }
@@ -261,7 +265,7 @@ textarea.code { width: 100%; min-height: 80px; resize: vertical; background: var
 .radio-head b span { color: var(--warm); }
 .radio-head .tag { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); border: 1px solid var(--line); border-radius: 99px; padding: 2px 9px; }
 .radio .hint { margin: -6px 0 0; color: var(--faint); font-size: .8rem; }
-.radio .hint.gh { margin-top: -10px; } .radio .hint.gh .madeby { font-size: .86rem; }
+.radio .hint.gh { margin-top: -10px; display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap; } .radio .hint.gh .madeby { font-size: .86rem; }
 .stations button i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
 .radio-win { position: relative; height: 280px; border-radius: 22px; overflow: hidden; border: 6px solid #3a3352; box-shadow: 0 30px 60px -30px #000; }
 .radio-win canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -354,7 +358,7 @@ textarea.code { width: 100%; min-height: 80px; resize: vertical; background: var
       </section>
     </div>
   </div>
-  <div class="foot"><a class="madeby" href="https://github.com/priotts/lofi-dev" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg>priotts/lofi-dev</a><span id="footTxt"></span><button class="small" id="endBtn" type="button"></button><button class="small ghost" id="resetBtn" type="button"></button></div>
+  <div class="foot"><a class="madeby" href="https://github.com/priotts/lofi-dev" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg>priotts/lofi-dev</a><span id="footTxt"></span><a class="linkbtn" id="starLink" href="https://github.com/priotts/lofi-dev" target="_blank" rel="noopener"></a><a class="linkbtn" id="bugLink" href="https://github.com/priotts/lofi-dev/issues/new" target="_blank" rel="noopener"></a><button class="small" id="endBtn" type="button"></button><button class="small ghost" id="resetBtn" type="button"></button></div>
 </div>
 
 <div class="radio" id="radio" hidden role="dialog" aria-modal="true" aria-labelledby="stName">
@@ -375,7 +379,7 @@ textarea.code { width: 100%; min-height: 80px; resize: vertical; background: var
     </div>
     <button type="button" class="primary close" id="radioClose"></button>
     <p class="hint"><span id="radioHint"></span></p>
-    <p class="hint gh"><a class="madeby" href="https://github.com/priotts" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg>priotts</a></p>
+    <p class="hint gh"><a class="madeby" href="https://github.com/priotts" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg>priotts</a><a class="linkbtn" id="starLink2" href="https://github.com/priotts/lofi-dev" target="_blank" rel="noopener"></a></p>
   </div>
 </div>
 <div class="dialog" id="dialog" hidden><section class="card" id="dialogCard"></section></div>
@@ -402,7 +406,7 @@ const UI = {
     keys: "<kbd>WASD</kbd> o <kbd>frecce</kbd> per camminare · <kbd>E</kbd> per interagire · oppure tocca",
     stand: "Sei in piedi. Siediti alla tua scrivania per programmare: lì ogni tasto che premi scrive codice.",
     goDesk: "Vai alla scrivania", tap: "Tocca per scrivere", auto: "Auto-code", autoOn: "Auto-code acceso: il codice si scrive da solo", autoOff: "Auto-code spento", autoHint: "Scrive da solo, come {n} tasti al secondo. Premere i tasti va ancora più veloce.", standUp: "Alzati", lines: "righe", perKey: "caratteri per tasto", teamCps: "team: {n} car/s", cps: "car/s",
-    coffeeOn: "caffè · {n} s", foot: "Il gioco si salva da solo in questo browser.", reset: "Ricomincia da capo", resetSure: "Sicuro? Premi di nuovo", sure: "Sicuro?",
+    coffeeOn: "caffè · {n} s", foot: "Il gioco si salva da solo in questo browser.", reset: "Ricomincia da capo", star: "⭐ Lascia una stella", bug: "🐞 Segnala un bug", bugTitle: "Bug: ", bugBody: "**Cosa è successo?**\n\n\n**Cosa ti aspettavi?**\n\n", resetSure: "Sicuro? Premi di nuovo", sure: "Sicuro?",
     editorLabel: "Editor: quando sei seduto, premi qualsiasi tasto per scrivere", officeLabel: "Il tuo ufficio visto dall'alto",
     tutTitle: "Primi passi", tut1: "Scegli un lavoro dalla bacheca qui sotto", tut2: "Vai alla scrivania e siediti (tasto E o tocco)", tut3: "Premi tasti a caso finché il lavoro è consegnato",
     job: "Lavoro in corso", noJob: "Nessun lavoro in corso. Scegline uno dalla bacheca qui sotto.", ownProject: "Progetto tuo", personal: "Progetto personale",
@@ -457,7 +461,7 @@ const UI = {
     keys: "<kbd>WASD</kbd> or <kbd>arrows</kbd> to walk · <kbd>E</kbd> to interact · or tap",
     stand: "You're standing. Sit at your desk to code: once you're there, every key you press writes code.",
     goDesk: "Go to your desk", tap: "Tap to type", auto: "Auto-code", autoOn: "Auto-code on: the code writes itself", autoOff: "Auto-code off", autoHint: "Types on its own, like {n} keys per second. Pressing keys is still faster.", standUp: "Stand up", lines: "lines", perKey: "chars per key", teamCps: "team: {n} chars/s", cps: "chars/s",
-    coffeeOn: "coffee · {n}s", foot: "The game saves itself in this browser.", reset: "Start over", resetSure: "Sure? Press again", sure: "Sure?",
+    coffeeOn: "coffee · {n}s", foot: "The game saves itself in this browser.", reset: "Start over", star: "⭐ Star on GitHub", bug: "🐞 Report a bug", bugTitle: "Bug: ", bugBody: "**What happened?**\n\n\n**What did you expect?**\n\n", resetSure: "Sure? Press again", sure: "Sure?",
     editorLabel: "Editor: while seated, press any key to type", officeLabel: "Your office, seen from above",
     tutTitle: "Getting started", tut1: "Pick a job from the board below", tut2: "Walk to your desk and sit down (E key or tap)", tut3: "Mash keys until the job ships",
     job: "Current job", noJob: "No job right now. Pick one from the board below.", ownProject: "Your own project", personal: "Personal project",
@@ -828,6 +832,9 @@ const ACH = [
 ];
 
 // stazioni della radio: ogni traccia è generata dal vivo con accordi, ritmo e timbri diversi
+const GAME_VERSION = "1.3";
+let stars = null;
+function renderStars() { ["starLink", "starLink2"].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = t("star") + (stars != null ? `<b>${stars}</b>` : ""); }); }
 const STATIONS = [
   { n: { it: "Pioggia di notte", en: "Night rain" }, d: { it: "Città addormentata, finestre accese, pioggia sul vetro.", en: "A sleepy city, lit windows, rain on the glass." }, scene: "city", accent: "#92b7dd",
     bpm: 74, swing: 0.12, chords: [[53, 57, 60, 64], [52, 55, 59, 62], [50, 53, 57, 60], [48, 52, 55, 59, 62]], bass: [41, 40, 38, 36],
@@ -911,7 +918,7 @@ function perKey() {
   if (S.boost > 0) k *= 1.5;
   return Math.max(1, Math.round(k));
 }
-function autoKps() { return 2 * (1 + 0.5 * owned("autocode")); }
+function autoKps() { return 4 * (1 + 0.5 * owned("autocode")); }
 function autoCps() { return S.auto && P.seated && S.blackout <= 0 ? autoKps() * perKey() : 0; }
 function memberCps(m) { if (m.state !== "work" || !m.seated || S.blackout > 0) return 0; return ROLES[m.role].cps * (0.3 + 0.7 * m.energy / 100) * charsMult(); }
 function teamCps() { return S.team.reduce((a, m) => a + memberCps(m), 0); }
@@ -2580,6 +2587,21 @@ function setEndgame(on) {
   toast(on ? t("endToast") : t("endBack"));
 }
 $("endBtn").addEventListener("click", () => setEndgame(!endgame));
+fetch("https://api.github.com/repos/priotts/lofi-dev").then(r => r.ok ? r.json() : null).then(d => {
+  if (d && typeof d.stargazers_count === "number") { stars = d.stargazers_count; renderStars(); }
+}).catch(() => {});
+function bugUrl() {
+  const info = [
+    "---",
+    `- Version: ${GAME_VERSION}${endgame ? " (end game)" : ""}`,
+    `- Browser: ${navigator.userAgent}`,
+    `- Screen: ${innerWidth}×${innerHeight} @${devicePixelRatio || 1}x`,
+    `- Language: ${lang}`,
+    `- Level ${S.level}, office ${S.office + 1}, ${S.stars || 0}★`,
+  ].join("\n");
+  return "https://github.com/priotts/lofi-dev/issues/new?labels=bug&title=" + encodeURIComponent(t("bugTitle")) + "&body=" + encodeURIComponent(t("bugBody") + info);
+}
+["pointerdown", "focus", "mouseenter"].forEach(ev => $("bugLink").addEventListener(ev, () => { $("bugLink").href = bugUrl(); }));
 /* ================= input ================= */
 const now = () => performance.now() / 1000;
 const KEYMAP = { ArrowLeft: "left", a: "left", A: "left", ArrowRight: "right", d: "right", D: "right", ArrowUp: "up", w: "up", W: "up", ArrowDown: "down", s: "down", S: "down" };
@@ -2653,7 +2675,9 @@ function setLang(l, remember) {
   $("keysHint").innerHTML = t("keys");
   $("standTxt").textContent = t("stand"); $("goDesk").textContent = t("goDesk"); $("goAuto").textContent = "▶ " + t("auto");
   $("typeBtn").textContent = t("tap"); $("standBtn").innerHTML = `${t("standUp")} <kbd>Esc</kbd>`;
-  $("footTxt").textContent = t("foot"); $("resetBtn").textContent = endgame ? t("endReset") : t("reset");
+  $("footTxt").textContent = t("foot");
+  renderStars();
+  $("bugLink").textContent = t("bug"); $("resetBtn").textContent = endgame ? t("endReset") : t("reset");
   $("endBtn").textContent = endgame ? t("endOff") : t("endOn");
   $("testPill").hidden = !endgame; $("testPill").textContent = t("testMode");
   $("radioBtn").title = t("radioTitle");
