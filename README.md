@@ -1,28 +1,8 @@
 # Lo-fi Dev
 
-**[Gioca / Play → priotts.github.io/lofi-dev](https://priotts.github.io/lofi-dev/)**
+**[Play / Gioca → priotts.github.io/lofi-dev](https://priotts.github.io/lofi-dev/)**
 
-[Italiano](#italiano) · [English](#english)
-
----
-
-## Italiano
-
-Un simulatore di sviluppatore molto rilassato, con musica lo-fi generata dal vivo nel browser.
-
-### Radio lo-fi
-La pagina si apre sulla radio: otto stazioni, ognuna con il suo ritmo e la sua scena illustrata (città sotto la pioggia, caffè del mattino, spiaggia al tramonto, spazio, tramonto a 8 bit, baita nel bosco, neve, treno di mezzanotte). Si regolano musica e pioggia, e si può lasciare accesa mentre si lavora. Con **Entra nel gioco** si passa all'ufficio.
-
-### Il gioco
-- Cammini per l'ufficio, ti siedi alla scrivania e ogni tasto scrive codice.
-- Accetti lavori dalla bacheca e parli con i clienti: le risposte contano e un cliente si può perdere.
-- Sali di livello, compri gadget, assumi un team (ogni ruolo ha il suo badge) e traslochi.
-- Quattro uffici, ognuno con stile e arredi propri: cameretta, coworking, ufficio sopra la panetteria, studio sul fiume con ping pong e cabinato.
-- Imprevisti tranquilli: blackout, gatti sulla tastiera, pizze dai clienti.
-- Scheda **Tu**: personalizzi personaggio e ufficio, statistiche, 19 trofei, "Vendi lo studio" per ripartire con una stella, esporta/importa del salvataggio.
-- **Modalità test**: un pulsante in fondo alla pagina (o `?endgame` nell'URL) apre una partita separata con tutto al massimo.
-
-La lingua (italiano o inglese) viene scelta in automatico dal browser.
+[English](#english) · [Italiano](#italiano)
 
 ---
 
@@ -46,16 +26,36 @@ The language (Italian or English) is picked automatically from your browser.
 
 ---
 
-## Musica / Music
+## Italiano
 
-Tutta la musica è sintetizzata in tempo reale con la Web Audio API: niente file audio, niente copyright.  
-All music is synthesized in real time with the Web Audio API: no audio files, no copyright.
+Un simulatore di sviluppatore molto rilassato, con musica lo-fi generata dal vivo nel browser.
 
-## Sviluppo / Development
+### Radio lo-fi
+La pagina si apre sulla radio: otto stazioni, ognuna con il suo ritmo e la sua scena illustrata (città sotto la pioggia, caffè del mattino, spiaggia al tramonto, spazio, tramonto a 8 bit, baita nel bosco, neve, treno di mezzanotte). Si regolano musica e pioggia, e si può lasciare accesa mentre si lavora. Con **Entra nel gioco** si passa all'ufficio.
 
-Un solo `index.html`, senza build: basta aprirlo nel browser.  
-A single `index.html`, no build step: just open it in a browser.
+### Il gioco
+- Cammini per l'ufficio, ti siedi alla scrivania e ogni tasto scrive codice.
+- Accetti lavori dalla bacheca e parli con i clienti: le risposte contano e un cliente si può perdere.
+- Sali di livello, compri gadget, assumi un team (ogni ruolo ha il suo badge) e traslochi.
+- Quattro uffici, ognuno con stile e arredi propri: cameretta, coworking, ufficio sopra la panetteria, studio sul fiume con ping pong e cabinato.
+- Imprevisti tranquilli: blackout, gatti sulla tastiera, pizze dai clienti.
+- Scheda **Tu**: personalizzi personaggio e ufficio, statistiche, 19 trofei, "Vendi lo studio" per ripartire con una stella, esporta/importa del salvataggio.
+- **Modalità test**: un pulsante in fondo alla pagina (o `?endgame` nell'URL) apre una partita separata con tutto al massimo.
 
-Visite contate con / Visits counted with [Umami](https://umami.is) (no cookies).
+La lingua (italiano o inglese) viene scelta in automatico dal browser.
+
+---
+
+## Music / Musica
+
+All music is synthesized in real time with the Web Audio API: no audio files, no copyright.  
+Tutta la musica è sintetizzata in tempo reale con la Web Audio API: niente file audio, niente copyright.
+
+## Development / Sviluppo
+
+A single `index.html`, no build step: just open it in a browser.  
+Un solo `index.html`, senza build: basta aprirlo nel browser.
+
+Visits counted with / Visite contate con [Umami](https://umami.is) (no cookies).
 
 Made by [priotts](https://github.com/priotts).
