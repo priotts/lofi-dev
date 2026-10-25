@@ -1,0 +1,2302 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lo-fi Dev</title>
+<meta name="description" content="A cozy lo-fi developer simulator: code for clients, grow a team, expand your office, or just leave the lo-fi radio on while you work.">
+<meta name="theme-color" content="#17151f">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23f4b86a'/%3E%3Cpath d='m9 8-4 4 4 4M15 8l4 4-4 4' fill='none' stroke='%23241a10' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<!-- Statistiche visite (Umami Cloud, senza cookie) -->
+<script defer src="https://cloud.umami.is/script.js" data-website-id="60c13798-3dc7-4648-b714-fb5d82847749"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shantell+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+/* Layout: barra in alto con statistiche; a sinistra l'ufficio (protagonista) e sotto il monitor; a destra guida iniziale, lavoro in corso con chat e le schede. */
+:root {
+  --bg: #17151f;
+  --bg-2: #1d1a27;
+  --panel: #221f2d;
+  --panel-2: #2b2739;
+  --line: #363149;
+  --ink: #efe8dc;
+  --muted: #a39bb3;
+  --faint: #6f6886;
+  --warm: #f4b86a;
+  --warm-ink: #241a10;
+  --sage: #9fcaa4;
+  --rose: #ec9a90;
+  --sky: #92b7dd;
+  --lilac: #b9a0da;
+  --f-display: "Shantell Sans", "Comic Neue", ui-rounded, system-ui, sans-serif;
+  --f-ui: "Shantell Sans", "Comic Neue", ui-rounded, system-ui, sans-serif;
+  --f-code: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 16px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background: radial-gradient(1200px 500px at 20% -10%, #2a2340 0%, transparent 60%), var(--bg);
+  color: var(--ink); font-family: var(--f-ui); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 14px 36px; min-height: 100vh;
+}
+.wrap { max-width: 1200px; margin: 0 auto; display: grid; gap: 14px; }
+
+.topbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; background: color-mix(in srgb, var(--panel) 85%, transparent); border: 1px solid var(--line); border-radius: var(--r); padding: 10px 12px 10px 16px; }
+.brand { display: flex; align-items: center; gap: 10px; margin-right: auto; }
+.logo { width: 34px; height: 34px; border-radius: 10px; background: var(--warm); display: grid; place-items: center; }
+.logo svg { width: 20px; height: 20px; }
+h1 { margin: 0; font-family: var(--f-display); font-weight: 800; font-size: 1.45rem; line-height: 1; }
+h1 span { color: var(--warm); }
+.stats { display: flex; gap: 8px; flex-wrap: wrap; align-items: stretch; }
+.chip { display: flex; align-items: center; gap: 8px; background: var(--bg-2); border: 1px solid var(--line); border-radius: 12px; padding: 6px 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.chip .lab { font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+.chip .val { font-family: var(--f-display); font-weight: 700; font-size: 1.05rem; }
+.chip.money .val { color: var(--warm); font-size: 1.2rem; font-weight: 800; }
+.chip.lvl { flex-direction: column; align-items: stretch; gap: 4px; min-width: 200px; }
+.chip.lvl .row { display: flex; justify-content: space-between; gap: 10px; font-size: .82rem; }
+.chip.lvl .row b { font-weight: 600; }
+.chip.lvl .row span { color: var(--muted); }
+.xp { height: 5px; background: var(--panel-2); border-radius: 99px; overflow: hidden; }
+.xp i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--lilac), var(--sky)); transition: width .4s; }
+.tools { display: flex; gap: 6px; align-items: center; }
+.seg { display: flex; background: var(--bg-2); border: 1px solid var(--line); border-radius: 10px; padding: 2px; }
+.seg button { border: 0; background: transparent; padding: 4px 9px; border-radius: 8px; font-size: .8rem; font-weight: 700; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--panel-2); color: var(--ink); }
+
+button { font: inherit; color: var(--ink); background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 7px 12px; cursor: pointer; transition: border-color .15s, background .15s, transform .05s; }
+button:hover:not(:disabled) { border-color: color-mix(in srgb, var(--warm) 70%, var(--line)); }
+button:active:not(:disabled) { transform: translateY(1px); }
+button:focus-visible { outline: 2px solid var(--warm); outline-offset: 2px; }
+button:disabled { opacity: .42; cursor: not-allowed; }
+button.small { font-size: .82rem; padding: 5px 10px; border-radius: 9px; }
+button.primary { background: var(--warm); color: var(--warm-ink); border-color: var(--warm); font-weight: 600; }
+button.ghost { background: transparent; }
+.iconbtn { display: inline-flex; align-items: center; gap: 6px; font-size: .86rem; padding: 6px 10px; }
+.iconbtn svg { width: 17px; height: 17px; flex: none; }
+.iconbtn.on { background: color-mix(in srgb, var(--warm) 18%, var(--panel-2)); border-color: var(--warm); color: var(--warm); }
+
+.main { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+@media (max-width: 900px) { .main { grid-template-columns: minmax(0, 1fr); } }
+.left, .right { display: grid; gap: 14px; min-width: 0; }
+
+.office { position: relative; border-radius: var(--r); overflow: hidden; border: 1px solid var(--line); background: #13111a; max-width: 100%; aspect-ratio: 12 / 8; touch-action: manipulation; box-shadow: 0 18px 40px -24px #000; }
+.office canvas { display: block; width: 100%; height: 100%; cursor: pointer; }
+.ov { position: absolute; font-size: .76rem; color: var(--ink); background: color-mix(in srgb, #13111a 78%, transparent); padding: 3px 10px; border-radius: 99px; pointer-events: none; backdrop-filter: blur(3px); }
+.ov.place { left: 10px; top: 10px; font-weight: 600; }
+.ov.clock { right: 10px; top: 10px; font-variant-numeric: tabular-nums; color: var(--muted); }
+.ov.keys { left: 50%; transform: translateX(-50%); bottom: 10px; color: var(--muted); white-space: nowrap; }
+kbd { font-family: var(--f-code); font-size: .86em; background: var(--panel-2); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; padding: 0 5px; color: var(--ink); }
+
+.monitor { background: #13111a; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
+.tabbar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--panel); border-bottom: 1px solid var(--line); font-family: var(--f-code); font-size: .76rem; color: var(--muted); }
+.dots { display: flex; gap: 6px; }
+.dots i { width: 10px; height: 10px; border-radius: 50%; display: block; }
+.dots i:nth-child(1) { background: var(--rose); } .dots i:nth-child(2) { background: var(--warm); } .dots i:nth-child(3) { background: var(--sage); }
+.ftab { color: var(--ink); background: #13111a; padding: 3px 10px; border-radius: 7px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.boost { margin-left: auto; color: var(--warm); white-space: nowrap; font-family: var(--f-ui); font-weight: 600; }
+.editor { position: relative; height: 240px; overflow: hidden; padding: 10px 0; cursor: text; user-select: none; font-family: var(--f-code); font-size: .8rem; line-height: 1.6; outline: none; }
+.editor:focus-visible { box-shadow: inset 0 0 0 2px var(--warm); }
+.editor .ln { display: flex; white-space: pre; }
+.editor .ln .n { width: 3.6em; flex: none; text-align: right; padding-right: 1em; color: #4a4460; font-variant-numeric: tabular-nums; }
+.editor .ln .c { overflow: hidden; min-width: 0; color: #dcd4e6; }
+.k { color: var(--warm); } .s { color: var(--sage); } .cm { color: var(--faint); font-style: italic; } .nu { color: var(--rose); } .fn { color: var(--sky); }
+.caret { display: inline-block; width: .55em; height: 1.1em; vertical-align: -0.2em; background: var(--warm); animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.standing { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 16px; font-family: var(--f-ui); background: color-mix(in srgb, #13111a 84%, transparent); }
+.standing p { margin: 0 0 12px; color: var(--muted); max-width: 36ch; }
+.bug { position: absolute; width: 36px; height: 36px; border: 0; padding: 0; background: transparent; cursor: pointer; border-radius: 50%; animation: wiggle 1.4s ease-in-out infinite; z-index: 3; }
+.bug svg { width: 100%; height: 100%; display: block; }
+@keyframes wiggle { 0%,100% { transform: rotate(-12deg) translateY(0); } 50% { transform: rotate(12deg) translateY(-3px); } }
+.statusbar { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; padding: 6px 12px; background: var(--panel); border-top: 1px solid var(--line); font-family: var(--f-code); font-size: .72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.seatbar { display: flex; gap: 8px; padding: 8px; background: var(--panel); }
+.seatbar .typebtn { flex: 1; padding: 12px; font-weight: 600; font-size: 1rem; }
+
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; min-width: 0; }
+.card h2 { margin: 0 0 10px; font-family: var(--f-display); font-size: 1.02rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.eyebrow { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+
+.tut ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.tut li { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 10px; align-items: start; color: var(--muted); font-size: .9rem; }
+.tut li .chk { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; font-size: .78rem; font-weight: 700; color: var(--muted); }
+.tut li.now { color: var(--ink); }
+.tut li.now .chk { border-color: var(--warm); color: var(--warm); }
+.tut li.ok { color: var(--faint); text-decoration: line-through; }
+.tut li.ok .chk { background: var(--sage); border-color: var(--sage); color: var(--bg); }
+
+.job-top { display: flex; gap: 12px; align-items: center; }
+.job-name { font-family: var(--f-display); font-size: 1.12rem; font-weight: 700; line-height: 1.25; text-wrap: balance; }
+.job-client { color: var(--muted); font-size: .86rem; }
+.avatar { width: 40px; height: 40px; flex: none; border-radius: 50%; display: grid; place-items: center; font-family: var(--f-display); font-weight: 800; font-size: 1.05rem; color: #17151f; }
+.pill { font-size: .72rem; font-weight: 600; padding: 1px 8px; border-radius: 99px; background: color-mix(in srgb, currentColor 14%, transparent); white-space: nowrap; }
+.pill.good { color: var(--sage); } .pill.ok { color: var(--sky); } .pill.meh { color: var(--warm); } .pill.bad { color: var(--rose); }
+.meters { display: grid; gap: 8px; margin: 14px 0 4px; }
+.meter { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 10px; align-items: center; font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.meter .track { height: 8px; background: var(--bg); border-radius: 99px; overflow: hidden; }
+.meter .track i { display: block; height: 100%; border-radius: 99px; transition: width .3s, background .4s; }
+.pay { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: baseline; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); font-size: .86rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pay b { color: var(--warm); font-family: var(--f-display); font-weight: 800; font-size: 1.1rem; }
+.chat { display: grid; gap: 6px; margin-top: 12px; padding: 10px; background: var(--bg-2); border-radius: 12px; }
+.msg { padding: 7px 11px; border-radius: 14px; font-size: .87rem; max-width: 88%; line-height: 1.4; }
+.msg.c { background: var(--panel-2); border-bottom-left-radius: 4px; justify-self: start; }
+.msg.me { background: color-mix(in srgb, var(--warm) 26%, var(--panel)); border-bottom-right-radius: 4px; justify-self: end; }
+.msg.sys { color: var(--muted); font-size: .78rem; justify-self: center; background: none; padding: 0; text-align: center; }
+.choices { display: grid; gap: 6px; margin-top: 8px; }
+.choices button { text-align: left; font-size: .87rem; display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+.choices .odds { color: var(--warm); font-size: .72rem; font-weight: 700; white-space: nowrap; }
+.job-actions { display: flex; justify-content: flex-end; margin-top: 10px; }
+.empty { color: var(--muted); font-size: .9rem; margin: 0; }
+
+.tabs { display: flex; gap: 4px; margin-bottom: 12px; background: var(--bg-2); padding: 4px; border-radius: 12px; overflow-x: auto; }
+.tabs button { flex: 1; border: 0; background: transparent; color: var(--muted); padding: 7px 8px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-size: .86rem; font-weight: 600; white-space: nowrap; }
+.tabs button svg { width: 16px; height: 16px; flex: none; }
+.tabs button[aria-selected="true"] { background: var(--panel-2); color: var(--ink); }
+.badge { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 99px; background: var(--warm); color: var(--warm-ink); font-size: .7rem; font-weight: 800; display: inline-grid; place-items: center; }
+.list { display: grid; gap: 8px; }
+.row-item { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 12px; background: var(--panel-2); border-radius: 13px; border: 1px solid transparent; }
+.row-item:hover { border-color: var(--line); }
+.row-item .ico { width: 40px; height: 40px; border-radius: 11px; background: var(--bg); display: grid; place-items: center; }
+.row-item .ico svg { width: 24px; height: 24px; }
+.row-item .t { font-weight: 600; display: flex; gap: 6px; align-items: baseline; flex-wrap: wrap; line-height: 1.3; }
+.row-item .t small { color: var(--muted); font-weight: 500; font-variant-numeric: tabular-nums; font-size: .8rem; }
+.row-item .d { color: var(--muted); font-size: .8rem; line-height: 1.35; display: block; margin-top: 2px; }
+.row-item .act { display: grid; gap: 5px; justify-items: end; font-variant-numeric: tabular-nums; }
+.row-item .price { color: var(--warm); font-family: var(--f-display); font-weight: 700; white-space: nowrap; }
+.row-item.done .price { color: var(--sage); }
+.row-item.lock { opacity: .5; }
+.tier { font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
+.tier.s { color: var(--sage); } .tier.m { color: var(--sky); } .tier.l { color: var(--lilac); } .tier.p { color: var(--muted); }
+.energy { height: 5px; width: 100%; background: var(--bg); border-radius: 99px; overflow: hidden; margin-top: 6px; }
+.energy i { display: block; height: 100%; transition: width .5s; }
+.subhead { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 2px 0 8px; font-size: .82rem; color: var(--muted); flex-wrap: wrap; }
+.subhead.mt { margin-top: 16px; }
+.log { font-size: .85rem; color: var(--muted); display: grid; gap: 6px; max-height: 300px; overflow: auto; }
+.log div { padding-left: 12px; border-left: 2px solid var(--line); }
+.log div b { color: var(--ink); font-weight: 600; }
+
+.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%) translateY(20px); background: var(--panel-2); border: 1px solid var(--line); box-shadow: 0 12px 30px -10px #000; color: var(--ink); padding: 11px 18px; border-radius: 14px; opacity: 0; transition: opacity .3s, transform .3s; pointer-events: none; max-width: min(520px, calc(100vw - 32px)); text-align: center; z-index: 20; font-weight: 500; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.float { position: fixed; pointer-events: none; color: var(--warm); font-family: var(--f-display); font-weight: 800; animation: up 1.1s ease-out forwards; z-index: 21; }
+@keyframes up { to { transform: translateY(-40px); opacity: 0; } }
+.foot { color: var(--faint); font-size: .8rem; text-align: center; display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap; }
+.testpill { font-size: .7rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--warm-ink); background: var(--lilac); border-radius: 99px; padding: 2px 9px; }
+.stars { color: var(--warm); margin-left: 4px; }
+
+/* scheda "Tu": stile, trofei, statistiche */
+.swatches { display: flex; flex-wrap: wrap; gap: 6px; }
+.sw { width: 30px; height: 30px; border-radius: 50%; padding: 0; border: 2px solid var(--line); }
+.sw[aria-pressed="true"] { border-color: var(--ink); box-shadow: 0 0 0 2px var(--warm); }
+.opt { font-size: .8rem; padding: 4px 10px; }
+.opt[aria-pressed="true"] { background: color-mix(in srgb, var(--warm) 20%, var(--panel-2)); border-color: var(--warm); }
+.style-grid { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 10px 12px; align-items: center; font-size: .82rem; color: var(--muted); }
+.statgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+.stat { background: var(--panel-2); border-radius: 12px; padding: 8px 12px; }
+.stat b { display: block; font-family: var(--f-display); font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+.stat span { font-size: .74rem; color: var(--muted); }
+.ach { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.ach div { background: var(--panel-2); border-radius: 12px; padding: 8px 10px; font-size: .8rem; color: var(--muted); border: 1px solid transparent; line-height: 1.35; }
+.ach div b { display: block; color: var(--ink); font-size: .86rem; }
+.ach div.got { border-color: color-mix(in srgb, var(--warm) 60%, transparent); background: color-mix(in srgb, var(--warm) 10%, var(--panel-2)); }
+.ach div:not(.got) b { color: var(--muted); }
+textarea.code { width: 100%; min-height: 80px; resize: vertical; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 8px; font-family: var(--f-code); font-size: .72rem; }
+.btnrow { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+
+/* modalità radio */
+.radio { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; overflow: auto; padding: 24px max(16px, env(safe-area-inset-left, 0px)); background: radial-gradient(900px 600px at 50% 0%, #2d2547, #120f1b 70%); }
+.radio-in { width: min(560px, 100%); display: grid; gap: 16px; text-align: center; }
+.radio-win { position: relative; height: 210px; border-radius: 22px; overflow: hidden; border: 6px solid #3a3352; box-shadow: 0 30px 60px -30px #000; }
+.radio-win canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.radio h2 { margin: 0; font-family: var(--f-display); font-size: 1.5rem; }
+.radio .sub { color: var(--muted); font-size: .9rem; margin-top: -10px; }
+.transport { display: flex; justify-content: center; gap: 10px; align-items: center; }
+.transport button { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; padding: 0; }
+.transport button svg { width: 22px; height: 22px; }
+.transport .play { width: 64px; height: 64px; background: var(--warm); border-color: var(--warm); color: var(--warm-ink); }
+.stations { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.stations button { font-size: .82rem; padding: 5px 11px; border-radius: 99px; }
+.stations button[aria-pressed="true"] { background: var(--warm); color: var(--warm-ink); border-color: var(--warm); }
+.mixer { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 12px; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 12px 16px; text-align: left; font-size: .86rem; }
+.mixer input[type=range] { width: 100%; accent-color: var(--warm); }
+.pomo { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; display: grid; gap: 8px; }
+.pomo .time { font-family: var(--f-display); font-weight: 800; font-size: 3rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.pomo .phase { color: var(--muted); font-size: .86rem; }
+.pomo .btnrow { justify-content: center; margin: 0; }
+.radio .close { justify-self: center; }
+
+.dialog { position: fixed; inset: 0; z-index: 40; background: rgba(10,8,18,.7); display: grid; place-items: center; padding: 16px; }
+.dialog .card { width: min(480px, 100%); }
+
+@media (max-width: 640px) {
+  .topbar { padding: 10px; }
+  .radio-win { height: 150px; }
+  .pomo .time { font-size: 2.4rem; }
+  .stats { width: 100%; }
+  .chip.lvl { min-width: 0; flex: 1 1 100%; order: 3; }
+  .chip.money, .chip.rep { flex: 1; }
+  .iconbtn .txt { display: none; }
+  .ov.keys { display: none; }
+  .editor { height: 200px; }
+}
+@media (prefers-reduced-motion: reduce) { .bug, .caret { animation: none; } .float { animation-duration: .01s; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#241a10" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m8 8-4 4 4 4M16 8l4 4-4 4"/></svg></span>
+      <h1>Lo-fi <span>Dev</span></h1>
+      <span class="testpill" id="testPill" hidden></span>
+    </div>
+    <div class="stats">
+      <div class="chip money"><span class="val" id="money">0 €</span></div>
+      <div class="chip lvl"><div class="row"><b id="lvlName">Lv. 1</b><span id="lvlXp">0 / 50 XP</span></div><div class="xp"><i id="xpBar"></i></div></div>
+      <div class="chip rep"><span class="lab" data-i18n="rep"></span><span class="val" id="rep">0</span></div>
+    </div>
+    <div class="tools">
+      <button id="musicBtn" class="iconbtn" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg><span class="txt" id="musicTxt"></span></button>
+      <button id="nextBtn" class="iconbtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 5 9 7-9 7V5ZM19 5v14"/></svg></button>
+      <button id="rainBtn" class="iconbtn" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 15a4 4 0 1 1 1-7.9A5.5 5.5 0 0 1 18.5 9 3.5 3.5 0 0 1 18 16H7"/><path d="M8 19l-1 2M12 19l-1 2M16 19l-1 2"/></svg><span class="txt" id="rainTxt"></span></button>
+      <button id="radioBtn" class="iconbtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="2.5"/><path d="m7 8 9-5"/><circle cx="15.5" cy="14" r="2.5"/><path d="M7 12h3M7 16h3"/></svg><span class="txt" id="radioTxt"></span></button>
+      <div class="seg" role="group" aria-label="Language"><button type="button" data-lang="it" aria-pressed="false">IT</button><button type="button" data-lang="en" aria-pressed="false">EN</button></div>
+    </div>
+  </header>
+
+  <div class="main">
+    <div class="left">
+      <div class="office" id="officeBox">
+        <canvas id="room"></canvas>
+        <span class="ov place" id="placeName"></span>
+        <span class="ov clock" id="status"></span>
+        <span class="ov keys" id="keysHint"></span>
+      </div>
+
+      <section class="monitor" id="monitor">
+        <div class="tabbar"><span class="dots"><i></i><i></i><i></i></span><span class="ftab" id="fileTab">index.js</span><span class="boost" id="boost"></span></div>
+        <div class="editor" id="editor" tabindex="0">
+          <div id="code"></div>
+          <div class="standing" id="standing">
+            <div><p id="standTxt"></p><button type="button" class="primary" id="goDesk"></button></div>
+          </div>
+        </div>
+        <div class="statusbar"><span id="sbLoc"></span><span id="sbPower"></span><span id="sbTeam"></span></div>
+        <div class="seatbar" id="seatbar" hidden>
+          <button class="typebtn primary" id="typeBtn" type="button"></button>
+          <button id="standBtn" type="button"></button>
+        </div>
+      </section>
+    </div>
+
+    <div class="right">
+      <section class="card tut" id="tutCard" hidden></section>
+      <section class="card" id="jobCard" aria-live="polite"></section>
+      <section class="card">
+        <div class="tabs" role="tablist" id="tabs"></div>
+        <div id="panel"></div>
+      </section>
+    </div>
+  </div>
+  <div class="foot"><span id="footTxt"></span><button class="small" id="endBtn" type="button"></button><button class="small ghost" id="resetBtn" type="button"></button></div>
+</div>
+
+<div class="radio" id="radio" hidden role="dialog" aria-modal="true" aria-labelledby="stName">
+  <div class="radio-in">
+    <div class="radio-win"><canvas id="radioCv"></canvas></div>
+    <h2 id="stName"></h2>
+    <div class="sub" id="stSub"></div>
+    <div class="transport">
+      <button type="button" id="rPrev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 5-9 7 9 7V5ZM5 5v14"/></svg></button>
+      <button type="button" id="rPlay" class="play"></button>
+      <button type="button" id="rNext"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 5 9 7-9 7V5ZM19 5v14"/></svg></button>
+    </div>
+    <div class="stations" id="stations"></div>
+    <div class="mixer">
+      <label for="volMusic" id="volMusicL"></label><input type="range" id="volMusic" min="0" max="100">
+      <label for="volRain" id="volRainL"></label><input type="range" id="volRain" min="0" max="100">
+    </div>
+    <div class="pomo">
+      <div class="eyebrow" id="pomoTitle"></div>
+      <div class="time" id="pomoTime">25:00</div>
+      <div class="phase" id="pomoPhase"></div>
+      <div class="btnrow"><button type="button" class="primary" id="pomoGo"></button><button type="button" id="pomoReset"></button></div>
+    </div>
+    <button type="button" class="close" id="radioClose"></button>
+  </div>
+</div>
+<div class="dialog" id="dialog" hidden><section class="card" id="dialogCard"></section></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(() => {
+'use strict';
+
+/* ================= lingua ================= */
+const LANG_KEY = "lofi-dev-lang";
+function detectLang() {
+  try { const s = localStorage.getItem(LANG_KEY); if (s === "it" || s === "en") return s; } catch (e) {}
+  const list = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || "en"];
+  return list.some(l => /^it\b/i.test(l)) ? "it" : "en";
+}
+let lang = detectLang();
+const L = v => (v && typeof v === "object" && !Array.isArray(v) && ("it" in v || "en" in v)) ? v[lang] : v;
+
+const UI = {
+  it: {
+    rep: "Reputazione", lv: "Liv.", music: "Lo-fi", musicOn: "Lo-fi accesa", rain: "Pioggia", rainOn: "Pioggia accesa",
+    night: "notte", dawn: "alba", day: "giorno", sunset: "tramonto", raining: "piove piano",
+    keys: "<kbd>WASD</kbd> o <kbd>frecce</kbd> per camminare · <kbd>E</kbd> per interagire · oppure tocca",
+    stand: "Sei in piedi. Siediti alla tua scrivania per programmare: lì ogni tasto che premi scrive codice.",
+    goDesk: "Vai alla scrivania", tap: "Tocca per scrivere", standUp: "Alzati", lines: "righe", perKey: "caratteri per tasto", teamCps: "team: {n} car/s", cps: "car/s",
+    coffeeOn: "caffè · {n} s", foot: "Il gioco si salva da solo in questo browser.", reset: "Ricomincia da capo", resetSure: "Sicuro? Premi di nuovo", sure: "Sicuro?",
+    editorLabel: "Editor: quando sei seduto, premi qualsiasi tasto per scrivere", officeLabel: "Il tuo ufficio visto dall'alto",
+    tutTitle: "Primi passi", tut1: "Scegli un lavoro dalla bacheca qui sotto", tut2: "Vai alla scrivania e siediti (tasto E o tocco)", tut3: "Premi tasti a caso finché il lavoro è consegnato",
+    job: "Lavoro in corso", noJob: "Nessun lavoro in corso. Scegline uno dalla bacheca qui sotto.", ownProject: "Progetto tuo", personal: "Progetto personale",
+    progress: "Righe", mood: "Umore", estPay: "Paga stimata", salaries: "stipendi −{n}", replyFirst: "Rispondi per poter consegnare", risky: "rischio",
+    abandon: "Rinuncia al lavoro", abandonSure: "Sicuro? Il cliente ci resterà male",
+    moods: ["contento", "tranquillo", "perplesso", "irritato"],
+    tabBoard: "Bacheca", tabTeam: "Team", tabShop: "Negozio", tabLog: "Diario",
+    tiers: { s: "Piccolo", m: "Medio", l: "Grande", p: "Personale" },
+    newClient: "cliente nuovo", moodIs: "umore {m}", picky: "esigente", noClient: "Nessun cliente, nessuna sorpresa", accept: "Accetta",
+    lostN: "Clienti persi: {n}", lost0: "Nessun cliente perso, per ora", more: "Cerca altri lavori", moreIn: "Cerca altri lavori ({n} s)",
+    stWork: "al lavoro", stGo: "va alla scrivania", stArrive: "sta arrivando", stBreak: "in pausa caffè",
+    salary: "stipendio {n} a consegna", breakBtn: "Pausa caffè", fireBtn: "Saluta", solo: "Lavori da solo.", soloHint: "Al livello 2 potrai assumere qualcuno.",
+    desks: "Scrivanie occupate: {a} / {b}", breakAll: "Pausa per tutti", cvs: "Curriculum arrivati", moreCv: "Altri curriculum", moreCvIn: "Altri curriculum ({n} s)",
+    freeTime: "Nel tempo libero {t}.", hireBtn: "Assumi", full: "Tutte le scrivanie sono occupate. Per crescere ancora serve un ufficio più grande.",
+    move: "Trasloco: {n}", unlockAt: "Si sblocca al livello {n}.", moveBtn: "Trasloca", bestOffice: "Sei già nell'ufficio più bello della città.",
+    gadgets: "Gadget", taken: "Preso", buy: "Compra", logEmpty: "Una serata tranquilla. Il primo cliente aspetta.",
+    welcome: "Benvenuto! Scegli un lavoro dalla bacheca, poi siediti alla scrivania.",
+    finishFirst: "Finisci prima il lavoro in corso.", accepted: "Accettato <b>{j}</b>{c}", forClient: " per {c}", noClientSys: "Nessun cliente. Solo tu, il codice e la pioggia.",
+    greet: "Ciao {n}! Ci penso io.", gaveUp: "Rinunciato a <b>{j}</b>", gaveUpWords: "Peccato. Pensavo di potermi fidare.",
+    lostLog: "<b>{n}</b> ({w}) ha scelto un altro sviluppatore", lostToast: "Hai perso {n} come cliente. {w}",
+    wrote: "{n} ti ha scritto.", delivered: "Consegnato <b>{j}</b> · +{p}{s}", salariesLog: " (stipendi −{n})", deployed: "Deploy riuscito. {w} è contento: +{p}", futureYou: "Il tuo io del futuro",
+    lvlLog: "Livello <b>{n}</b>: ora sei <b>{t}</b>", lvlToast: "Livello {n}! Ora sei {t}.", unlocked: " Sbloccati: {u}",
+    noDesk: "Non ci sono scrivanie libere. Trasloca in un ufficio più grande.", hired: "Assunto/a <b>{n}</b>, {r}", hiredToast: "{n} entra in ufficio. Benvenuto/a!",
+    left: "<b>{n}</b> ha lasciato il team. Ci si saluta con un abbraccio", bought: "Comprato <b>{n}</b>", boughtToast: "{n}: preso!", catToast: "Un gatto si è sistemato sul tappeto. Vai ad accarezzarlo.",
+    movedLog: "Trasloco in <b>{n}</b>", movedToast: "Benvenuto in: {n}. Ora hai {d} scrivanie.", lookBoard: "Ecco i lavori disponibili, a destra.",
+    talk: "Parla con {n}", onBreak: "{n} è in pausa caffè. Ci parli dopo.", needBreak: "{n}: \"Grazie, avevo proprio bisogno di una pausa.\"",
+    coffeeWait: "La moka si sta ancora scaldando. Ancora {n} s.", espressoToast: "Espresso perfetto. Scrivi il 50% più veloce per 90 secondi.", mokaToast: "Caffè della moka. Scrivi il 50% più veloce per 45 secondi.",
+    readWait: "Hai appena letto un capitolo. Lascia sedimentare.", reads: ["Leggi un capitolo sulle closure. +XP", "Ripassi le regex. Fanno sempre un po' paura. +XP", "Un capitolo su come dare buoni nomi alle variabili. +XP", "Leggi di algoritmi di ordinamento prima di dormire. +XP"],
+    noSleep: "Non hai sonno, per ora.", nap: "Ti fai un pisolino di due ore. La pioggia continua a cadere.", rested: "Ti sei appena riposato.", sofa: "Cinque minuti sul divano. Ti torna l'ispirazione.",
+    sideB: "Giri il disco. Lato B.", cats: ["Il gatto fa le fusa.", "Il gatto si gira a pancia in su. È una trappola.", "Il gatto ti guarda e chiude gli occhi piano. Ti vuole bene."], water: "Annaffi il pothos. Sembra contento.",
+    chats: ["\"Sto lavorando su {j}.\"", "\"Oggi {t}, come sempre.\"", "\"Tutto bene! Questa playlist è perfetta.\"", "\"Ho trovato un bug, ma è carino. Lo tengo.\""], refactor: "un refactoring che nessuno ha chiesto",
+    bugAria: "Schiaccia il bug", bugMe: "Bug schiacciato · +{p}", bugBy: "<b>{n}</b> ha schiacciato un bug · +{p}",
+    away: "Mentre eri via il team ha scritto {n} righe. Sono un po' stanchi.", noAudio: "Questo browser non supporta l'audio.", newGame: "Nuova partita. Scrivania pulita.",
+    radio: "Solo radio", radioTitle: "Radio lo-fi", radioSub: "Musica generata dal vivo, senza copyright. Lasciala andare mentre lavori.", back: "Torna al gioco",
+    play: "Play", pause: "Pausa", next: "Traccia successiva", prev: "Traccia precedente", volMusic: "Musica", volRain: "Pioggia", nowPlaying: "In onda: {n}",
+    pomoTitle: "Timer Pomodoro", pomoFocus: "Concentrazione · pomodoro {n}", pomoBreak: "Pausa · alzati e bevi un po' d'acqua", pomoLong: "Pausa lunga · te la sei meritata",
+    pomoStart: "Avvia", pomoPause: "Pausa", pomoResume: "Riprendi", pomoReset: "Azzera", pomoDoneFocus: "Pomodoro finito! Cinque minuti di pausa.", pomoDoneBreak: "Pausa finita. Si riparte.",
+    testMode: "Modalità test", endOn: "Prova l'end game", endOff: "Torna alla tua partita", endReset: "Ricomincia end game", endToast: "Modalità test: tutto al massimo. La tua partita vera è al sicuro.", endBack: "Bentornato nella tua partita.",
+    tabYou: "Tu", lookTitle: "Il tuo stile", shirt: "Maglia", hair: "Capelli", hstyle: "Taglio", skin: "Pelle", glasses: "Occhiali", floor: "Pavimento", rug: "Tappeto", yes: "Sì", no: "No",
+    hstyles: ["Corti", "Lunghi", "Chignon", "Ricci"], floors: ["Parquet", "Piastrelle", "Bosco", "Moquette"],
+    statsTitle: "Statistiche", achTitle: "Trofei {a} / {b}", st: { loc: "righe scritte", jobs: "lavori consegnati", earned: "guadagnati in tutto", bugs: "bug schiacciati", coffees: "caffè bevuti", pets: "carezze al gatto", events: "imprevisti", pomos: "pomodori", time: "tempo di gioco", lost: "clienti persi" },
+    achGot: "Trofeo sbloccato: {n}", achLog: "Trofeo <b>{n}</b>",
+    prestTitle: "Vendi lo studio", prestDesc: "Ricominci da capo con una stella in più: ogni stella dà +25% di paga e di velocità. Trofei, stile e statistiche restano.", prestLock: "Disponibile dal livello 8 nello studio sul fiume.", prestBtn: "Vendi e ricomincia", prestSure: "Sicuro? Premi di nuovo", prestToast: "Studio venduto! Riparti con {n} ★.",
+    saveTitle: "Salvataggio", exportBtn: "Esporta", importBtn: "Importa", exportDesc: "Copia questo codice e incollalo su un altro dispositivo con Importa.", copy: "Copia", copied: "Copiato!", close: "Chiudi", importDesc: "Incolla qui il codice esportato. La partita attuale verrà sostituita.", load: "Carica", badCode: "Questo codice non sembra un salvataggio valido.", imported: "Salvataggio caricato.",
+    ev: { blackout: "Blackout! Si spegne tutto. Accendi una candela e aspetti.", light: "Torna la luce. Il router lampeggia felice.", catKeys: "Un gatto ti cammina sulla tastiera. Ha scritto {n} righe, e compilano.", catKeysNo: "Il gatto del vicino entra dalla finestra e ti cammina sulla tastiera. Ha scritto {n} righe.", pizza: "{n} vi manda una pizza. Il team torna pieno di energie.", pizzaNo: "La vicina ti porta una fetta di torta. Energia piena.", rainbow: "Smette di piovere per un attimo e spunta un arcobaleno. Ispirazione: +50% per 40 secondi.", review: "Un vecchio cliente ti lascia una recensione a cinque stelle. +2 reputazione.", tip: "Trovi una mancia dimenticata in un vecchio progetto: +{p}." },
+    blackType: "È buio. Aspetta che torni la luce.",
+    E: "E · ",
+    labels: { desk: "Siediti e programma", coffee: "Bevi un caffè", board: "Guarda la bacheca dei lavori", shelf: "Leggi un libro di programmazione", bed: "Fai un pisolino", sofa: "Riposati sul divano", vinyl: "Cambia disco", cat: "Accarezza il gatto", plant: "Annaffia la pianta" },
+  },
+  en: {
+    rep: "Reputation", lv: "Lv.", music: "Lo-fi", musicOn: "Lo-fi on", rain: "Rain", rainOn: "Rain on",
+    night: "night", dawn: "dawn", day: "day", sunset: "sunset", raining: "light rain",
+    keys: "<kbd>WASD</kbd> or <kbd>arrows</kbd> to walk · <kbd>E</kbd> to interact · or tap",
+    stand: "You're standing. Sit at your desk to code: once you're there, every key you press writes code.",
+    goDesk: "Go to your desk", tap: "Tap to type", standUp: "Stand up", lines: "lines", perKey: "chars per key", teamCps: "team: {n} chars/s", cps: "chars/s",
+    coffeeOn: "coffee · {n}s", foot: "The game saves itself in this browser.", reset: "Start over", resetSure: "Sure? Press again", sure: "Sure?",
+    editorLabel: "Editor: while seated, press any key to type", officeLabel: "Your office, seen from above",
+    tutTitle: "Getting started", tut1: "Pick a job from the board below", tut2: "Walk to your desk and sit down (E key or tap)", tut3: "Mash keys until the job ships",
+    job: "Current job", noJob: "No job right now. Pick one from the board below.", ownProject: "Your own project", personal: "Personal project",
+    progress: "Lines", mood: "Mood", estPay: "Estimated pay", salaries: "salaries −{n}", replyFirst: "Reply to be able to deliver", risky: "risky",
+    abandon: "Drop this job", abandonSure: "Sure? The client will be upset",
+    moods: ["happy", "calm", "puzzled", "annoyed"],
+    tabBoard: "Jobs", tabTeam: "Team", tabShop: "Shop", tabLog: "Journal",
+    tiers: { s: "Small", m: "Medium", l: "Large", p: "Personal" },
+    newClient: "new client", moodIs: "mood: {m}", picky: "demanding", noClient: "No client, no surprises", accept: "Accept",
+    lostN: "Clients lost: {n}", lost0: "No clients lost, so far", more: "Find more jobs", moreIn: "Find more jobs ({n}s)",
+    stWork: "working", stGo: "heading to desk", stArrive: "arriving", stBreak: "on a coffee break",
+    salary: "{n} salary per delivery", breakBtn: "Coffee break", fireBtn: "Say goodbye", solo: "You work alone.", soloHint: "At level 2 you can hire someone.",
+    desks: "Desks taken: {a} / {b}", breakAll: "Break for everyone", cvs: "Applications", moreCv: "More applications", moreCvIn: "More applications ({n}s)",
+    freeTime: "In their free time they {t}.", hireBtn: "Hire", full: "Every desk is taken. To grow further you need a bigger office.",
+    move: "Move to: {n}", unlockAt: "Unlocks at level {n}.", moveBtn: "Move", bestOffice: "You're already in the nicest office in town.",
+    gadgets: "Gadgets", taken: "Owned", buy: "Buy", logEmpty: "A quiet evening. The first client is waiting.",
+    welcome: "Welcome! Pick a job from the board, then sit at your desk.",
+    finishFirst: "Finish the current job first.", accepted: "Took on <b>{j}</b>{c}", forClient: " for {c}", noClientSys: "No client. Just you, the code and the rain.",
+    greet: "Hi {n}! I'm on it.", gaveUp: "Dropped <b>{j}</b>", gaveUpWords: "Shame. I thought I could count on you.",
+    lostLog: "<b>{n}</b> ({w}) went with another developer", lostToast: "You lost {n} as a client. {w}",
+    wrote: "{n} sent you a message.", delivered: "Delivered <b>{j}</b> · +{p}{s}", salariesLog: " (salaries −{n})", deployed: "Deployed. {w} is happy: +{p}", futureYou: "Future you",
+    lvlLog: "Level <b>{n}</b>: you're now a <b>{t}</b>", lvlToast: "Level {n}! You're now a {t}.", unlocked: " Unlocked: {u}",
+    noDesk: "No free desks. Move to a bigger office.", hired: "Hired <b>{n}</b>, {r}", hiredToast: "{n} walks into the office. Welcome!",
+    left: "<b>{n}</b> left the team, with a hug", bought: "Bought <b>{n}</b>", boughtToast: "{n}: yours!", catToast: "A cat has settled on the rug. Go give it a pet.",
+    movedLog: "Moved to <b>{n}</b>", movedToast: "Welcome to: {n}. You now have {d} desks.", lookBoard: "Here are the open jobs, on the right.",
+    talk: "Talk to {n}", onBreak: "{n} is on a coffee break. Talk later.", needBreak: "{n}: \"Thanks, I really needed a break.\"",
+    coffeeWait: "The moka pot is still heating up. {n}s to go.", espressoToast: "Perfect espresso. You type 50% faster for 90 seconds.", mokaToast: "Moka pot coffee. You type 50% faster for 45 seconds.",
+    readWait: "You just read a chapter. Let it sink in.", reads: ["You read a chapter on closures. +XP", "You review regular expressions. Still a bit scary. +XP", "A chapter on naming variables well. +XP", "You read about sorting algorithms before bed. +XP"],
+    noSleep: "You're not sleepy yet.", nap: "You take a two-hour nap. The rain keeps falling.", rested: "You just rested.", sofa: "Five minutes on the couch. Inspiration is back.",
+    sideB: "You flip the record. Side B.", cats: ["The cat purrs.", "The cat rolls belly up. It's a trap.", "The cat looks at you and slowly blinks. It loves you."], water: "You water the pothos. It looks happy.",
+    chats: ["\"I'm working on {j}.\"", "\"Today I {t}, as always.\"", "\"All good! This playlist is perfect.\"", "\"I found a bug, but it's cute. Keeping it.\""], refactor: "a refactor nobody asked for",
+    bugAria: "Squash the bug", bugMe: "Bug squashed · +{p}", bugBy: "<b>{n}</b> squashed a bug · +{p}",
+    away: "While you were away the team wrote {n} lines. They're a bit tired.", noAudio: "This browser doesn't support audio.", newGame: "New game. Clean desk.",
+    radio: "Radio only", radioTitle: "Lo-fi radio", radioSub: "Music generated live, copyright free. Leave it on while you work.", back: "Back to the game",
+    play: "Play", pause: "Pause", next: "Next track", prev: "Previous track", volMusic: "Music", volRain: "Rain", nowPlaying: "Now playing: {n}",
+    pomoTitle: "Pomodoro timer", pomoFocus: "Focus · pomodoro {n}", pomoBreak: "Break · stand up and drink some water", pomoLong: "Long break · you earned it",
+    pomoStart: "Start", pomoPause: "Pause", pomoResume: "Resume", pomoReset: "Reset", pomoDoneFocus: "Pomodoro done! Five-minute break.", pomoDoneBreak: "Break's over. Back to it.",
+    testMode: "Test mode", endOn: "Try the end game", endOff: "Back to your game", endReset: "Restart end game", endToast: "Test mode: everything maxed out. Your real game is safe.", endBack: "Welcome back to your game.",
+    tabYou: "You", lookTitle: "Your style", shirt: "Shirt", hair: "Hair", hstyle: "Haircut", skin: "Skin", glasses: "Glasses", floor: "Floor", rug: "Rug", yes: "Yes", no: "No",
+    hstyles: ["Short", "Long", "Bun", "Curly"], floors: ["Wood", "Tiles", "Forest", "Carpet"],
+    statsTitle: "Stats", achTitle: "Trophies {a} / {b}", st: { loc: "lines written", jobs: "jobs delivered", earned: "earned in total", bugs: "bugs squashed", coffees: "coffees", pets: "cat pets", events: "surprises", pomos: "pomodoros", time: "time played", lost: "clients lost" },
+    achGot: "Trophy unlocked: {n}", achLog: "Trophy <b>{n}</b>",
+    prestTitle: "Sell the studio", prestDesc: "Start over with one more star: each star gives +25% pay and speed. Trophies, style and stats are kept.", prestLock: "Available from level 8 in the riverside studio.", prestBtn: "Sell and start over", prestSure: "Sure? Press again", prestToast: "Studio sold! Starting over with {n} ★.",
+    saveTitle: "Save", exportBtn: "Export", importBtn: "Import", exportDesc: "Copy this code and paste it on another device with Import.", copy: "Copy", copied: "Copied!", close: "Close", importDesc: "Paste the exported code here. Your current game will be replaced.", load: "Load", badCode: "That code doesn't look like a valid save.", imported: "Save loaded.",
+    ev: { blackout: "Blackout! Everything goes dark. You light a candle and wait.", light: "The lights are back. The router blinks happily.", catKeys: "A cat walks across your keyboard. It wrote {n} lines, and they compile.", catKeysNo: "The neighbor's cat climbs in the window and walks on your keyboard. It wrote {n} lines.", pizza: "{n} sends the team a pizza. Everyone's energy is full.", pizzaNo: "Your neighbor brings you a slice of cake. Energy full.", rainbow: "The rain stops for a moment and a rainbow appears. Inspiration: +50% for 40 seconds.", review: "An old client leaves you a five-star review. +2 reputation.", tip: "You find a forgotten tip in an old project: +{p}." },
+    blackType: "It's dark. Wait for the lights to come back.",
+    E: "E · ",
+    labels: { desk: "Sit down and code", coffee: "Have a coffee", board: "Check the job board", shelf: "Read a programming book", bed: "Take a nap", sofa: "Rest on the couch", vinyl: "Change the record", cat: "Pet the cat", plant: "Water the plant" },
+  },
+};
+const t = (k, vars) => {
+  let s = UI[lang][k]; if (s == null) s = UI.it[k];
+  if (typeof s === "string" && vars) s = s.replace(/\{(\w+)\}/g, (_, v) => vars[v] != null ? vars[v] : "");
+  return s;
+};
+
+/* ================= contenuti ================= */
+const SNIPPETS = {
+  it: [
+`// carica gli ordini della pasticceria
+async function caricaOrdini(giorno) {
+  const res = await fetch(\`/api/ordini?giorno=\${giorno}\`);
+  if (!res.ok) throw new Error("niente cornetti oggi");
+  const ordini = await res.json();
+  return ordini.filter(o => o.stato !== "annullato");
+}
+`,
+`.hero {
+  display: grid;
+  place-items: center;
+  min-height: 60vh;
+  background: linear-gradient(#ffe8d6, #f7c59f);
+}
+`,
+`def rinomina_foto(cartella):
+    # ordina le foto delle vacanze per data
+    for i, nome in enumerate(sorted(os.listdir(cartella))):
+        data = leggi_exif(nome).get("data", "sconosciuta")
+        os.rename(nome, f"{data}_{i:03}.jpg")
+    return True
+`,
+`export function debounce(fn, ms = 300) {
+  let t;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), ms);
+  };
+}
+`,
+`const gatti = ["Miso", "Biscotto", "Polpetta"];
+for (const gatto of gatti) {
+  console.log(\`\${gatto} ha dormito sulla tastiera\`);
+}
+`,
+`// TODO: chiedere al cliente se "più blu" vuol dire più blu
+function coloreBottone(tema) {
+  return tema === "notte" ? "#2b2d42" : "#8d99ae";
+}
+`,
+`router.get("/libri/:id", async (req, res) => {
+  const libro = await db.libri.trova(req.params.id);
+  if (!libro) return res.status(404).json({ errore: "non trovato" });
+  res.json(libro);
+});
+`,
+`while (!caffe.finito()) {
+  scrivi(codice);
+  sorseggia(caffe, 0.1);
+}
+`,
+`SELECT bici, COUNT(*) AS riparazioni
+FROM interventi
+WHERE data > '2026-01-01'
+GROUP BY bici
+ORDER BY riparazioni DESC
+LIMIT 10;
+`,
+`// via jQuery. ci è voluto solo un decennio
+document.querySelectorAll(".card").forEach(card => {
+  card.addEventListener("click", () => card.classList.toggle("aperta"));
+});
+`,
+`test("somma due numeri", () => {
+  expect(somma(2, 2)).toBe(4);
+  expect(somma(0.1, 0.2)).toBeCloseTo(0.3);
+});
+`,
+  ],
+  en: [
+`// load today's bakery orders
+async function loadOrders(day) {
+  const res = await fetch(\`/api/orders?day=\${day}\`);
+  if (!res.ok) throw new Error("no croissants today");
+  const orders = await res.json();
+  return orders.filter(o => o.status !== "cancelled");
+}
+`,
+`.hero {
+  display: grid;
+  place-items: center;
+  min-height: 60vh;
+  background: linear-gradient(#ffe8d6, #f7c59f);
+}
+`,
+`def rename_photos(folder):
+    # sort vacation photos by date
+    for i, name in enumerate(sorted(os.listdir(folder))):
+        date = read_exif(name).get("date", "unknown")
+        os.rename(name, f"{date}_{i:03}.jpg")
+    return True
+`,
+`export function debounce(fn, ms = 300) {
+  let t;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), ms);
+  };
+}
+`,
+`const cats = ["Miso", "Biscuit", "Meatball"];
+for (const cat of cats) {
+  console.log(\`\${cat} slept on the keyboard\`);
+}
+`,
+`// TODO: ask the client if "more blue" means more blue
+function buttonColor(theme) {
+  return theme === "night" ? "#2b2d42" : "#8d99ae";
+}
+`,
+`router.get("/books/:id", async (req, res) => {
+  const book = await db.books.find(req.params.id);
+  if (!book) return res.status(404).json({ error: "not found" });
+  res.json(book);
+});
+`,
+`while (!coffee.empty()) {
+  write(code);
+  sip(coffee, 0.1);
+}
+`,
+`SELECT bike, COUNT(*) AS repairs
+FROM jobs
+WHERE date > '2026-01-01'
+GROUP BY bike
+ORDER BY repairs DESC
+LIMIT 10;
+`,
+`// goodbye jQuery. only took a decade
+document.querySelectorAll(".card").forEach(card => {
+  card.addEventListener("click", () => card.classList.toggle("open"));
+});
+`,
+`test("adds two numbers", () => {
+  expect(add(2, 2)).toBe(4);
+  expect(add(0.1, 0.2)).toBeCloseTo(0.3);
+});
+`,
+  ],
+};
+const FILES = { it: ["ordini.js", "style.css", "foto.py", "utils.js", "gatti.js", "tema.js", "routes.js", "vita.js", "query.sql", "app.js", "somma.test.js"], en: ["orders.js", "style.css", "photos.py", "utils.js", "cats.js", "theme.js", "routes.js", "life.js", "query.sql", "app.js", "add.test.js"] };
+const KW = /\b(const|let|var|function|async|await|return|if|else|for|while|of|in|new|class|this|export|import|from|throw|def|SELECT|FROM|WHERE|GROUP|BY|ORDER|LIMIT|AS|DESC|COUNT|True|null)\b/g;
+
+const TITLES = {
+  it: ["Stagista", "Freelance alle prime armi", "Junior dev", "Dev", "Dev esperto", "Senior dev", "Tech lead", "Fondatore di studio", "Studio indipendente", "Agenzia accogliente", "Leggenda del lo-fi"],
+  en: ["Intern", "Fledgling freelancer", "Junior dev", "Developer", "Seasoned dev", "Senior dev", "Tech lead", "Studio founder", "Indie studio", "Cozy agency", "Lo-fi legend"],
+};
+
+const CLIENTS = [
+  { id: "rosa", name: "Rosa", who: { it: "Pasticceria Rosa", en: "Rosa's Bakery" }, lvl: 1, picky: 0, hi: { it: "Ciao! Mi serve una mano col computer, ma tu sei bravo, vero?", en: "Hi! I need help with the computer stuff. You're good at this, right?" },
+    jobs: { it: ["Sito della pasticceria", "Modulo per ordinare le torte", "Menu digitale delle feste"], en: ["Bakery website", "Cake order form", "Holiday menu online"] } },
+  { id: "pina", name: { it: "Zia Pina", en: "Aunt Pina" }, who: { it: "la tua famiglia", en: "your family" }, lvl: 1, picky: 0, hi: { it: "Tesoro, tu che sei del mestiere…", en: "Sweetie, you're the computer person in the family…" },
+    jobs: { it: ["Script che rinomina le foto delle vacanze", "Album online per i nipoti", "Ricettario digitale"], en: ["Script to rename vacation photos", "Online album for the grandkids", "Digital recipe book"] } },
+  { id: "bruni", name: { it: "Sig. Bruni", en: "Mr. Bruni" }, who: { it: "Condominio di via Verdi 12", en: "12 Green St. condo board" }, lvl: 1, picky: 1, hi: { it: "Buonasera. Le scrivo a nome dell'assemblea condominiale.", en: "Good evening. I'm writing on behalf of the condo board." },
+    jobs: { it: ["Bot Telegram per il condominio", "Calendario dei turni scale", "Bacheca avvisi online"], en: ["Chat bot for the building", "Stair-cleaning rota", "Online notice board"] } },
+  { id: "gianni", name: "Gianni", who: { it: "Ciclofficina Pedale Lento", en: "Slow Pedal Bike Shop" }, lvl: 2, picky: 0, hi: { it: "Ehi! Mi hanno parlato bene di te in officina.", en: "Hey! People at the shop say good things about you." },
+    jobs: { it: ["Gestionale delle riparazioni", "Prenotazione tagliandi", "Mappa dei giri in bici"], en: ["Repair tracker", "Tune-up booking", "Map of bike rides"] } },
+  { id: "radici", name: { it: "Ale e Sara", en: "Ale & Sara" }, who: { it: "Podcast Radici", en: "Roots Podcast" }, lvl: 2, picky: 0, hi: { it: "Ciao! Facciamo un podcast sul giardinaggio e ci serve casa sul web.", en: "Hi! We host a gardening podcast and need a home on the web." },
+    jobs: { it: ["Landing page del podcast", "Player audio con capitoli", "Newsletter per gli ascoltatori"], en: ["Podcast landing page", "Audio player with chapters", "Listener newsletter"] } },
+  { id: "marta", name: "Marta", who: { it: "Libreria Il Gufo", en: "The Owl Bookshop" }, lvl: 3, picky: 0, hi: { it: "Buongiorno! Vorrei portare la libreria online senza perdere l'anima.", en: "Hello! I'd like to take the shop online without losing its soul." },
+    jobs: { it: ["Catalogo libri con ricerca", "Sistema per i prestiti", "Club del libro online"], en: ["Searchable book catalog", "Lending system", "Online book club"] } },
+  { id: "marco", name: "Marco", who: { it: "fotografo di gatti", en: "cat photographer" }, lvl: 3, picky: 1, hi: { it: "Ciao. Le foto sono la parte importante, il sito deve sparire.", en: "Hi. The photos matter. The site should disappear." },
+    jobs: { it: ["Portfolio fotografico", "Galleria con filtri per razza", "Negozio di stampe"], en: ["Photo portfolio", "Gallery filtered by breed", "Print shop"] } },
+  { id: "davide", name: "Davide", who: { it: "Agenzia WebSolutions 2009", en: "WebSolutions 2009 Agency" }, lvl: 4, picky: 2, hi: { it: "Ciao, abbiamo un cliente che aspetta da ieri. Urgente.", en: "Hi, we have a client who's been waiting since yesterday. Urgent." },
+    jobs: { it: ["Migrazione da jQuery", "Rifare il sito in un weekend", "Area riservata per i clienti"], en: ["jQuery migration", "Rebuild the site over a weekend", "Client login area"] } },
+  { id: "elena", name: "Elena", who: { it: "Rifugio Stella Alpina", en: "Edelweiss Mountain Hut" }, lvl: 4, picky: 0, hi: { it: "Ciao da quota 2100! Qui il wifi va e viene, abbi pazienza.", en: "Hello from 7,000 feet! The wifi comes and goes, bear with me." },
+    jobs: { it: ["Prenotazione posti letto", "Meteo in tempo reale", "Sito in tre lingue"], en: ["Bunk booking", "Live weather", "Site in three languages"] } },
+  { id: "franco", name: "Franco", who: { it: "Circolo bocce Borgo Sud", en: "South Side Bocce Club" }, lvl: 5, picky: 1, hi: { it: "Salve giovane. Al circolo vogliamo modernizzarci.", en: "Hello, young one. The club wants to modernize." },
+    jobs: { it: ["App per prenotare il campo", "Classifica del torneo", "Galleria delle cene sociali"], en: ["Court booking app", "Tournament leaderboard", "Club dinner photo gallery"] } },
+  { id: "kevin", name: "Kevin", who: { it: "Startup Disrupto (seed)", en: "Disrupto (seed stage)" }, lvl: 6, picky: 2, hi: { it: "Hey! Stiamo disruptando il mercato delle ciabatte. Sei dentro?", en: "Hey! We're disrupting the slipper market. You in?" },
+    jobs: { it: ["MVP in due settimane", "Pivot dell'MVP", "Dashboard per gli investitori"], en: ["MVP in two weeks", "Pivot the MVP", "Investor dashboard"] } },
+  { id: "ferri", name: { it: "Dott.ssa Ferri", en: "Dr. Ferri" }, who: { it: "Comune di Valfresca", en: "Town of Coolvale" }, lvl: 7, picky: 1, hi: { it: "Gentile sviluppatore, la contatto per un affidamento diretto.", en: "Dear developer, I'm contacting you about a town contract." },
+    jobs: { it: ["Prenotazioni all'anagrafe", "Mappa delle buche", "Sito accessibile del comune"], en: ["Town hall appointments", "Pothole map", "Accessible town website"] } },
+  { id: "ettore", name: "Ettore", who: { it: "Museo del Giocattolo", en: "Toy Museum" }, lvl: 8, picky: 0, hi: { it: "Salve! Abbiamo trentamila giocattoli e nessun sito.", en: "Hello! We have thirty thousand toys and no website." },
+    jobs: { it: ["Visita virtuale", "Audioguida sul telefono", "Archivio digitale della collezione"], en: ["Virtual tour", "Phone audio guide", "Digital collection archive"] } },
+];
+
+const EVENTS = [
+  { text: { it: "Già che ci sei, potresti aggiungere anche una pagina contatti? È una cosa piccolissima.", en: "While you're at it, could you add a contact page? It's tiny." }, opts: [
+    { l: { it: "Certo, nessun problema", en: "Sure, no problem" }, win: { rel: 12, lines: 0.3 }, wm: { it: "Grazie mille, sei un tesoro!", en: "Thank you so much, you're a gem!" } },
+    { l: { it: "Si può fare, ma costa un po' di più", en: "Can do, but it costs a bit extra" }, ok: 0.65, win: { pay: 0.3, rel: -2 }, wm: { it: "Giusto, è lavoro in più. Va bene.", en: "Fair, it's extra work. OK." }, lose: { rel: -16 }, lm: { it: "Mah, pensavo fosse incluso.", en: "Hm, I thought that was included." } },
+    { l: { it: "Facciamolo in una seconda fase", en: "Let's do it in a second phase" }, win: { rel: -5 }, wm: { it: "Ok… ne riparliamo.", en: "OK… we'll talk later." } },
+  ] },
+  { text: { it: "Il logo potete farlo più… vivace? Tipo che salti fuori dallo schermo?", en: "Can the logo be more… lively? Like, pop out of the screen?" }, opts: [
+    { l: { it: "Lo faccio più grande e arancione", en: "I'll make it bigger and orange" }, win: { rel: 8, lines: 0.1 }, wm: { it: "Sì! Proprio così!", en: "Yes! Exactly!" } },
+    { l: { it: "Ti spiego perché così funziona meglio", en: "Let me explain why this works better" }, ok: 0.55, win: { rel: 10 }, wm: { it: "Ah, non ci avevo pensato. Hai ragione.", en: "Oh, I hadn't thought of that. You're right." }, lose: { rel: -12 }, lm: { it: "Sarà, ma a me non convince.", en: "If you say so, but I'm not convinced." } },
+    { l: { it: "Fidati, va bene così", en: "Trust me, it's fine" }, win: { rel: -12 }, wm: { it: "Ok, come vuoi tu.", en: "OK, whatever you say." } },
+  ] },
+  { text: { it: "Ciao! Come procede? Domani ho una riunione e vorrei mostrare qualcosa.", en: "Hi! How's it going? I have a meeting tomorrow and want to show something." }, opts: [
+    { l: { it: "Ti preparo una demo per stasera", en: "I'll have a demo ready tonight" }, win: { rel: 12, lines: 0.12 }, wm: { it: "Perfetto, mi salvi!", en: "Perfect, you're a lifesaver!" } },
+    { l: { it: "Procede bene, ci sentiamo a fine settimana", en: "Going well, let's talk at the end of the week" }, win: { rel: -3 }, wm: { it: "Va bene, aspetto.", en: "OK, I'll wait." } },
+    { l: { it: "Non rispondere", en: "Don't reply" }, win: { rel: -15 }, wm: { it: "(due spunte blu, nessuna risposta)", en: "(read, no reply)" }, silent: true },
+  ] },
+  { text: { it: "Il budget è un po' stretto questo mese. Mi faresti uno sconto del 20%?", en: "Budget's a bit tight this month. Could you give me 20% off?" }, opts: [
+    { l: { it: "Va bene, per questa volta", en: "OK, just this once" }, win: { rel: 12, pay: -0.2 }, wm: { it: "Grazie, non lo dimentico.", en: "Thanks, I won't forget it." } },
+    { l: { it: "Posso arrivare al 10%", en: "I can do 10%" }, ok: 0.75, win: { rel: 3, pay: -0.1 }, wm: { it: "Affare fatto.", en: "Deal." }, lose: { rel: -8, pay: -0.1 }, lm: { it: "Speravo in qualcosa di più…", en: "I was hoping for more…" } },
+    { l: { it: "Il prezzo è quello concordato", en: "The price is what we agreed" }, ok: 0.5, win: { rel: -2 }, wm: { it: "Giusto, avevamo un accordo.", en: "Right, we had a deal." }, lose: { rel: -18 }, lm: { it: "Capisco. Ci penserò per il prossimo progetto.", en: "I see. I'll keep that in mind next time." } },
+  ] },
+  { text: { it: "Mio zio dice che il sito non si apre sul suo computer. Usa Internet Explorer.", en: "My uncle says the site won't open on his computer. He uses Internet Explorer." }, opts: [
+    { l: { it: "Ci guardo io, gratis", en: "I'll look into it, free" }, win: { rel: 10, lines: 0.15 }, wm: { it: "Lo zio ringrazia!", en: "Uncle says thanks!" } },
+    { l: { it: "Spiego con calma che IE non esiste più", en: "Gently explain IE is gone" }, ok: 0.6, win: { rel: 4 }, wm: { it: "Ah, ok. Gli installo un browser nuovo.", en: "Oh, OK. I'll install him a new browser." }, lose: { rel: -10 }, lm: { it: "Ma lui si trova bene con quello…", en: "But he likes that one…" } },
+    { l: { it: "Non è un problema mio", en: "Not my problem" }, win: { rel: -20 }, wm: { it: "Che risposta antipatica.", en: "What a rude answer." } },
+  ] },
+  { text: { it: "Possiamo fare una call veloce? Cinque minuti, giuro.", en: "Can we do a quick call? Five minutes, I promise." }, opts: [
+    { l: { it: "Certo, ti chiamo ora", en: "Sure, calling now" }, win: { rel: 7, lines: 0.05 }, wm: { it: "(dura quaranta minuti, ma è simpatica)", en: "(it lasts forty minutes, but it's nice)" } },
+    { l: { it: "Scriviamoci qui, faccio prima", en: "Let's chat here, it's quicker" }, ok: 0.7, win: { rel: 0 }, wm: { it: "Ok, ti scrivo tutto.", en: "OK, I'll write it all down." }, lose: { rel: -8 }, lm: { it: "Preferivo sentirti a voce.", en: "I'd rather have talked." } },
+  ] },
+  { text: { it: "Ho visto l'anteprima. È bellissima! Posso consigliarti a un'amica?", en: "I saw the preview. It's lovely! Can I recommend you to a friend?" }, opts: [
+    { l: { it: "Grazie, volentieri!", en: "Thank you, please do!" }, win: { rel: 6, rep: 1 }, wm: { it: "Le passo il tuo contatto.", en: "I'll pass on your contact." } },
+    { l: { it: "Grazie! Ti mando il mio biglietto da visita", en: "Thanks! I'll send you my business card" }, win: { rel: 4, rep: 2 }, wm: { it: "Ne ho già dati via tre!", en: "I've already handed out three!" } },
+  ] },
+  { text: { it: "Si può usare Comic Sans? A mia figlia piace tanto.", en: "Can we use Comic Sans? My daughter loves it." }, opts: [
+    { l: { it: "Ma certo", en: "Of course" }, win: { rel: 10 }, wm: { it: "Sarà felicissima.", en: "She'll be thrilled." } },
+    { l: { it: "Proviamo un font simile ma più leggibile", en: "Let's try a similar but more readable font" }, ok: 0.7, win: { rel: 6 }, wm: { it: "Oh, questo è ancora meglio!", en: "Oh, that's even better!" }, lose: { rel: -6 }, lm: { it: "Hmm, non è la stessa cosa.", en: "Hmm, it's not the same." } },
+    { l: { it: "Assolutamente no", en: "Absolutely not" }, win: { rel: -14 }, wm: { it: "Ok, scusa se ho chiesto.", en: "OK, sorry I asked." } },
+  ] },
+  { text: { it: "Ho cambiato idea sui colori. Possiamo rifare tutto in verde?", en: "I changed my mind on the colors. Can we redo it all in green?" }, opts: [
+    { l: { it: "Va bene, rifaccio i colori", en: "OK, I'll redo the colors" }, win: { rel: 9, lines: 0.2 }, wm: { it: "Grazie! Il verde mi rilassa.", en: "Thanks! Green calms me down." } },
+    { l: { it: "Ti preparo due versioni da confrontare", en: "I'll make two versions to compare" }, ok: 0.7, win: { rel: 8, lines: 0.08 }, wm: { it: "Ottima idea, scelgo la seconda.", en: "Great idea, I'll take the second." }, lose: { rel: -6, lines: 0.08 }, lm: { it: "Mi confondi, ne volevo una.", en: "Now I'm confused, I wanted one." } },
+    { l: { it: "Costa come un lavoro nuovo", en: "That's priced as a new job" }, ok: 0.45, win: { pay: 0.25 }, wm: { it: "Ok, mi sembra giusto.", en: "OK, that seems fair." }, lose: { rel: -15 }, lm: { it: "Addirittura?", en: "Seriously?" } },
+  ] },
+];
+
+const ROLES = {
+  junior: { name: { it: "Junior dev", en: "Junior dev" }, cps: 6, cost: 220, lvl: 2, color: "#92b7dd", desc: { it: "Scrive codice. Fa tante domande, ma impara.", en: "Writes code. Asks lots of questions, but learns." } },
+  designer: { name: { it: "Designer", en: "Designer" }, cps: 2, cost: 650, lvl: 3, color: "#ec9a90", desc: { it: "+10% di paga e clienti più contenti alla consegna.", en: "+10% pay and happier clients on delivery." } },
+  qa: { name: { it: "QA tester", en: "QA tester" }, cps: 3, cost: 550, lvl: 4, color: "#9fcaa4", desc: { it: "Trova e schiaccia da solo i bug nell'editor.", en: "Finds and squashes bugs in the editor on their own." } },
+  senior: { name: { it: "Senior dev", en: "Senior dev" }, cps: 18, cost: 1800, lvl: 5, color: "#f4b86a", desc: { it: "Molto veloce e si stanca la metà.", en: "Very fast and gets tired half as quickly." } },
+  pm: { name: { it: "Project manager", en: "Project manager" }, cps: 1, cost: 1600, lvl: 6, color: "#b9a0da", desc: { it: "Dimezza i danni quando un cliente si arrabbia.", en: "Halves the damage when a client gets upset." } },
+};
+const NAMES = ["Giulia", "Matteo", "Sofia", "Chiara", "Irene", "Pietro", "Noemi", "Samuele", "Bea", "Tommaso", "Anna", "Riccardo", "Elisa", "Jacopo", "Viola", "Nico", "Ada", "Emma", "Leo", "Greta", "Ivan", "Mia", "Ugo", "Rita"];
+const TRAITS = [
+  { it: "porta i biscotti il venerdì", en: "bring cookies on Fridays" }, { it: "usa vim e lo dice spesso", en: "use vim and mention it often" },
+  { it: "scrive i test prima del codice", en: "write tests before code" }, { it: "ha un cactus di nome Bug", en: "have a cactus named Bug" },
+  { it: "ascolta solo jazz giapponese", en: "only listen to Japanese jazz" }, { it: "commenta ogni riga", en: "comment every single line" },
+  { it: "chiama le variabili come i Pokémon", en: "name variables after Pokémon" }, { it: "lavora meglio con la pioggia", en: "work best when it rains" },
+  { it: "ha sempre una tisana", en: "always have herbal tea" }, { it: "fa le pull request più ordinate del mondo", en: "write the tidiest pull requests ever" },
+];
+const HAIR = ["#3b2a26", "#6b4a35", "#c98a4b", "#2a2a33", "#a3484a", "#e6d29a", "#5b3d6b"];
+const SKIN = ["#f6d3b3", "#e8b98f", "#c68b60", "#8d5a3b", "#f9dfc8"];
+const PANTS = ["#3d3a5c", "#4a5568", "#5b4636", "#2f3e46", "#6b4a6a"];
+
+const ICONS = {
+  key: '<svg viewBox="0 0 24 24" fill="none" stroke="#f4b86a" stroke-width="1.8" stroke-linecap="round"><rect x="2.5" y="6.5" width="19" height="11" rx="2.5"/><path d="M6 10h.01M9 10h.01M12 10h.01M15 10h.01M18 10h.01M7 14h10"/></svg>',
+  phones: '<svg viewBox="0 0 24 24" fill="none" stroke="#ec9a90" stroke-width="1.8" stroke-linecap="round"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/></svg>',
+  plant: '<svg viewBox="0 0 24 24" fill="none" stroke="#9fcaa4" stroke-width="1.8" stroke-linecap="round"><path d="M7 15h10l-1.5 6h-7L7 15ZM12 15V8M12 10c-3 0-5-2-5-5 3 0 5 2 5 5ZM12 12c3 0 5-2 5-5-3 0-5 2-5 5Z"/></svg>',
+  duck: '<svg viewBox="0 0 24 24" fill="#f2d066" stroke="#f4b86a" stroke-width="1.2"><path d="M4 14c0 4 4 6 8 6s8-2 8-6c0-2-2-3-4-3 1-1 1-2 1-3a4 4 0 0 0-8 0c0 1 .3 2 1 3H7c-2 0-3 1-3 3Z"/></svg>',
+  monitor: '<svg viewBox="0 0 24 24" fill="none" stroke="#92b7dd" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>',
+  lamp: '<svg viewBox="0 0 24 24" fill="none" stroke="#f4b86a" stroke-width="1.8" stroke-linecap="round"><path d="M8 3h8l3 8H5l3-8ZM12 11v8M8 21h8"/></svg>',
+  espresso: '<svg viewBox="0 0 24 24" fill="none" stroke="#f4b86a" stroke-width="1.8" stroke-linecap="round"><rect x="5" y="3" width="14" height="7" rx="1.5"/><path d="M8 10v3M16 10v3M8 16h8v2a3 3 0 0 1-3 3h-2a3 3 0 0 1-3-3v-2Z"/></svg>',
+  chair: '<svg viewBox="0 0 24 24" fill="none" stroke="#92b7dd" stroke-width="1.8" stroke-linecap="round"><path d="M7 3h10v9H7zM5 12h14M12 12v5M7 21l5-4 5 4"/></svg>',
+  vinyl: '<svg viewBox="0 0 24 24" fill="none" stroke="#ec9a90" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5"/></svg>',
+  cat: '<svg viewBox="0 0 24 24" fill="none" stroke="#efe8dc" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20c-1-5 0-9 2-11L6 4l4 3h4l4-3-1 5c2 2 3 6 2 11H5Z"/></svg>',
+  macro: '<svg viewBox="0 0 24 24" fill="none" stroke="#b9a0da" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><path d="M15 17h4M17 15v4"/></svg>',
+  house: '<svg viewBox="0 0 24 24" fill="none" stroke="#9fcaa4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 12 4l9 7M5 10v10h14V10M10 20v-6h4v6"/></svg>',
+  tBoard: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h6M7 13h10M7 17h4"/></svg>',
+  tTeam: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.3-5.5 6.5-5.5s5.7 2 6.5 5.5M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c1.8.8 3 2.6 3.5 5.2"/></svg>',
+  tShop: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>',
+  tYou: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4ZM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg>',
+  tLog: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11l3 3v13H5z"/><path d="M9 11h6M9 15h6"/></svg>',
+};
+
+const GADGETS = [
+  { id: "keyboard", name: { it: "Tastiera meccanica", en: "Mechanical keyboard" }, icon: "key", base: 15, grow: 1.32, lvl: 1, max: 10, desc: { it: "+2 caratteri a ogni tasto. Il clic-clac aiuta.", en: "+2 chars per key. The clickety-clack helps." } },
+  { id: "phones", name: { it: "Cuffie antirumore", en: "Noise-cancelling headphones" }, icon: "phones", base: 60, grow: 1, lvl: 1, max: 1, desc: { it: "+25% di caratteri a ogni tasto. Le porti in testa.", en: "+25% chars per key. You wear them around the office." } },
+  { id: "plant", name: { it: "Pothos", en: "Pothos" }, icon: "plant", base: 90, grow: 1.55, lvl: 2, max: 6, desc: { it: "+6% sulla paga di ogni lavoro. Compare nell'ufficio.", en: "+6% pay on every job. Shows up in the office." } },
+  { id: "duck", name: { it: "Paperella di gomma", en: "Rubber duck" }, icon: "duck", base: 160, grow: 1, lvl: 2, max: 1, desc: { it: "Più bug da schiacciare, e valgono il doppio.", en: "More bugs to squash, and they're worth double." } },
+  { id: "monitor", name: { it: "Monitor in più", en: "Extra monitor" }, icon: "monitor", base: 400, grow: 2, lvl: 3, max: 3, desc: { it: "+25% di caratteri per te e per il team.", en: "+25% chars for you and the team." } },
+  { id: "lamp", name: { it: "Lampada calda", en: "Warm desk lamp" }, icon: "lamp", base: 500, grow: 1, lvl: 3, max: 1, desc: { it: "Luce ambrata sulla scrivania. +12% sulla paga.", en: "Amber light on your desk. +12% pay." } },
+  { id: "espresso", name: { it: "Macchina dell'espresso", en: "Espresso machine" }, icon: "espresso", base: 900, grow: 1, lvl: 4, max: 1, desc: { it: "Il tuo caffè dura il doppio e le pause del team sono più corte.", en: "Your coffee lasts twice as long and team breaks are shorter." } },
+  { id: "chair", name: { it: "Sedie ergonomiche", en: "Ergonomic chairs" }, icon: "chair", base: 1600, grow: 1, lvl: 5, max: 1, desc: { it: "Il team si stanca il 40% più lentamente.", en: "The team tires 40% more slowly." } },
+  { id: "vinyl", name: { it: "Giradischi", en: "Record player" }, icon: "vinyl", base: 2500, grow: 1, lvl: 5, max: 1, desc: { it: "+15% di caratteri per tutti. Gira quando la radio è accesa.", en: "+15% chars for everyone. Spins when the radio is on." } },
+  { id: "cat", name: { it: "Un gatto per l'ufficio", en: "An office cat" }, icon: "cat", base: 5000, grow: 1, lvl: 6, max: 1, desc: { it: "Dorme sul tappeto. Si può accarezzare. +20% sulla paga.", en: "Sleeps on the rug. Pettable. +20% pay." } },
+  { id: "macro", name: { it: "Tastiera con le macro", en: "Macro keyboard" }, icon: "macro", base: 12000, grow: 1, lvl: 7, max: 1, desc: { it: "+50% di caratteri a ogni tasto.", en: "+50% chars per key." } },
+];
+
+const OFFICES = [
+  { name: { it: "Cameretta", en: "Bedroom" }, cols: 12, rows: 8, desks: 2, cost: 0, lvl: 1, note: { it: "Il letto è a due passi. Forse troppo pochi.", en: "The bed is two steps away. Maybe too close." } },
+  { name: { it: "Angolo in un coworking", en: "Coworking corner" }, cols: 16, rows: 10, desks: 4, cost: 600, lvl: 3, note: { it: "Quattro scrivanie, un divano e caffè condiviso.", en: "Four desks, a couch and shared coffee." } },
+  { name: { it: "Ufficio sopra la panetteria", en: "Office above the bakery" }, cols: 20, rows: 11, desks: 6, cost: 4000, lvl: 5, note: { it: "Sei scrivanie. Al mattino profuma di pane.", en: "Six desks. Smells like bread in the morning." } },
+  { name: { it: "Studio con vista sul fiume", en: "Riverside studio" }, cols: 24, rows: 14, desks: 9, cost: 25000, lvl: 8, note: { it: "Nove scrivanie e finestre grandi sul fiume.", en: "Nine desks and big windows over the river." } },
+];
+
+const SHIRTS = ["#f4b86a", "#92b7dd", "#ec9a90", "#9fcaa4", "#b9a0da", "#efe8dc", "#e07a5f", "#5c7aa8"];
+const FLOORS = [["#463739", "#4d3d3f", "#4a3a3c"], ["#3c4250", "#434a59", "#3f4654"], ["#33453a", "#3a4d40", "#36493d"], ["#4b3d55", "#52435c", "#4e4059"]];
+const RUGS = ["#6a5880", "#7a5d4f", "#4f6b7a", "#7a4f5f", "#5b7a55"];
+
+const ACH = [
+  { id: "job1", n: { it: "Primo deploy", en: "First deploy" }, d: { it: "Consegna un lavoro", en: "Deliver a job" }, ok: () => S.jobsDone >= 1 },
+  { id: "job10", n: { it: "Ci sai fare", en: "Getting good" }, d: { it: "Consegna 10 lavori", en: "Deliver 10 jobs" }, ok: () => S.jobsDone >= 10 },
+  { id: "job50", n: { it: "Macchina da deploy", en: "Deploy machine" }, d: { it: "Consegna 50 lavori", en: "Deliver 50 jobs" }, ok: () => S.jobsDone >= 50 },
+  { id: "loc1k", n: { it: "Mille righe", en: "A thousand lines" }, d: { it: "Scrivi 1.000 righe", en: "Write 1,000 lines" }, ok: () => S.loc >= 1000 },
+  { id: "loc10k", n: { it: "Romanziere del codice", en: "Code novelist" }, d: { it: "Scrivi 10.000 righe", en: "Write 10,000 lines" }, ok: () => S.loc >= 10000 },
+  { id: "earn10k", n: { it: "Affitto pagato", en: "Rent paid" }, d: { it: "Guadagna 10.000 in tutto", en: "Earn 10,000 in total" }, ok: () => S.earned >= 10000 },
+  { id: "earn1m", n: { it: "Milionario lo-fi", en: "Lo-fi millionaire" }, d: { it: "Guadagna un milione", en: "Earn a million" }, ok: () => S.earned >= 1e6 },
+  { id: "hire1", n: { it: "Non più da solo", en: "Not alone anymore" }, d: { it: "Assumi il primo collega", en: "Hire your first teammate" }, ok: () => S.team.length >= 1 },
+  { id: "full", n: { it: "Tutto esaurito", en: "Full house" }, d: { it: "Riempi tutte le scrivanie dello studio", en: "Fill every desk in the studio" }, ok: () => S.office === 3 && S.team.length >= teamSlots() },
+  { id: "river", n: { it: "Vista fiume", en: "River view" }, d: { it: "Trasloca nello studio sul fiume", en: "Move to the riverside studio" }, ok: () => S.office === 3 },
+  { id: "bugs25", n: { it: "Disinfestatore", en: "Exterminator" }, d: { it: "Schiaccia 25 bug", en: "Squash 25 bugs" }, ok: () => S.stats.bugs >= 25 },
+  { id: "coffee20", n: { it: "Sangue di caffè", en: "Coffee blood" }, d: { it: "Bevi 20 caffè", en: "Drink 20 coffees" }, ok: () => S.stats.coffees >= 20 },
+  { id: "pets10", n: { it: "Amico dei gatti", en: "Cat friend" }, d: { it: "Accarezza il gatto 10 volte", en: "Pet the cat 10 times" }, ok: () => S.stats.pets >= 10 },
+  { id: "lost", n: { it: "Non si piace a tutti", en: "Can't please everyone" }, d: { it: "Perdi un cliente", en: "Lose a client" }, ok: () => CLIENTS.some(c => cstate(c.id).lost) },
+  { id: "gadgets", n: { it: "Scrivania dei sogni", en: "Dream desk" }, d: { it: "Prendi tutti i gadget al massimo", en: "Max out every gadget" }, ok: () => GADGETS.every(g => owned(g.id) >= g.max) },
+  { id: "pomo4", n: { it: "Quattro pomodori", en: "Four pomodoros" }, d: { it: "Completa 4 pomodori nella radio", en: "Finish 4 pomodoros on the radio" }, ok: () => S.stats.pomos >= 4 },
+  { id: "owl", n: { it: "Gufo notturno", en: "Night owl" }, d: { it: "Programma tra le 3 e le 4 di notte", en: "Code between 3 and 4 AM" }, ok: () => P.seated && S.clock >= 180 && S.clock < 240 && now() - lastType < 2 },
+  { id: "events5", n: { it: "Va tutto bene", en: "This is fine" }, d: { it: "Vivi 5 imprevisti", en: "Live through 5 surprises" }, ok: () => S.stats.events >= 5 },
+  { id: "star", n: { it: "Si ricomincia", en: "New game plus" }, d: { it: "Vendi lo studio", en: "Sell the studio" }, ok: () => S.stars >= 1 },
+];
+
+// stazioni della radio: ogni traccia è generata dal vivo con accordi, ritmo e timbri diversi
+const STATIONS = [
+  { n: { it: "Pioggia di notte", en: "Night rain" }, bpm: 74, swing: 0.12, chords: [[53, 57, 60, 64], [52, 55, 59, 62], [50, 53, 57, 60], [48, 52, 55, 59, 62]], bass: [41, 40, 38, 36],
+    mel: [72, 69, 67, 64, 67, 69, 71, 72, 74, 71, 69, 67], cw: "triangle", mw: "sine", mc: 0.28, cv: 0.045, att: 0.04, kick: [0, 5], snare: [2, 6], hat: 0.05 },
+  { n: { it: "Caffè del mattino", en: "Morning coffee" }, bpm: 86, swing: 0.16, chords: [[50, 53, 57, 60, 64], [43, 53, 57, 59, 64], [48, 52, 55, 59, 62], [45, 49, 55, 58, 61]], bass: [38, 43, 36, 45],
+    mel: [74, 76, 79, 81, 79, 76, 74, 72, 69, 72, 74, 76], cw: "triangle", mw: "triangle", mc: 0.36, cv: 0.04, att: 0.02, kick: [0, 3, 5], snare: [2, 6], hat: 0.07 },
+  { n: { it: "Bossa pigra", en: "Lazy bossa" }, bpm: 68, swing: 0.04, chords: [[45, 52, 55, 59, 60], [50, 54, 57, 60, 64], [43, 50, 54, 57, 59], [48, 52, 55, 59, 64]], bass: [45, 38, 43, 36],
+    mel: [76, 74, 72, 71, 69, 67, 69, 71, 72, 74], cw: "sine", mw: "sine", mc: 0.3, cv: 0.06, att: 0.01, kick: [0, 3, 4, 7], snare: [], rim: [0, 3, 6], hat: 0.03, bassPat: [0, 3, 4, 7] },
+  { n: { it: "Spazio profondo", en: "Deep space" }, bpm: 56, swing: 0, chords: [[51, 55, 58, 62], [46, 50, 53, 57], [48, 51, 55, 58], [44, 48, 51, 55]], bass: [39, 34, 36, 32],
+    mel: [79, 77, 74, 72, 70, 74, 77, 82], cw: "sine", mw: "sine", mc: 0.16, cv: 0.06, att: 0.9, kick: [0], snare: [], hat: 0, long: true },
+  { n: { it: "Tramonto a 8 bit", en: "8-bit sunset" }, bpm: 80, swing: 0.1, chords: [[48, 52, 55, 59], [45, 48, 52, 55], [41, 45, 48, 52], [43, 47, 50, 53]], bass: [36, 33, 29, 31],
+    mel: [72, 76, 79, 76, 74, 72, 71, 74, 79, 84], cw: "square", mw: "square", mc: 0.32, cv: 0.012, mv: 0.018, att: 0.01, kick: [0, 4], snare: [2, 6], hat: 0.04 },
+];
+
+/* ================= stato ================= */
+const SAVE_KEY = "lofi-dev-save-v3", END_KEY = "lofi-dev-save-v3-endgame", MODE_KEY = "lofi-dev-mode", PREFS_KEY = "lofi-dev-prefs";
+let endgame = false;
+try { endgame = localStorage.getItem(MODE_KEY) === "end"; } catch (e) {}
+if (/[?&#]endgame\b/.test(location.search + location.hash)) endgame = true;
+const saveKey = () => endgame ? END_KEY : SAVE_KEY;
+let prefs = { station: 0, vol: 70, rainVol: 50 };
+try { Object.assign(prefs, JSON.parse(localStorage.getItem(PREFS_KEY) || "{}")); } catch (e) {}
+const savePrefs = () => { try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch (e) {} };
+function freshState() {
+  return {
+    money: 0, earned: 0, xp: 0, level: 1, loc: 0, jobsDone: 0, rep: 0, satOnce: false,
+    owned: {}, office: 0, snip: 0, pos: 0, lines: [""], lineNo: 1,
+    job: null, offers: [], clients: {}, team: [], candidates: [],
+    clock: 22 * 60, rain: true, log: [], boost: 0, boostCd: 0, boardCd: 0, cvCd: 0, lastSeen: Date.now(), uid: 1,
+    stars: 0, ach: {}, stats: { bugs: 0, coffees: 0, pets: 0, events: 0, pomos: 0, time: 0 },
+    look: { shirt: "#f4b86a", hair: "#3b2a26", hs: 0, skin: "#f6d3b3", glasses: false }, decor: { floor: 0, rug: 0 }, blackout: 0, evT: 150,
+  };
+}
+function endgameState() {
+  const s = freshState();
+  Object.assign(s, { level: 10, xp: 0, money: 5e6, earned: 2e7, loc: 48000, jobsDone: 120, rep: 45, satOnce: true, office: 3, clock: 23 * 60 });
+  GADGETS.forEach(g => s.owned[g.id] = g.max);
+  s.stats = { bugs: 60, coffees: 40, pets: 12, events: 8, pomos: 0, time: 0 };
+  const roles = ["senior", "senior", "junior", "junior", "designer", "qa", "pm", "senior"];
+  s.team = roles.map((role, i) => ({ id: 1000 + i, name: NAMES[i * 3 % NAMES.length], role, trait: i % TRAITS.length, cost: 0, salary: Math.round(ROLES[role].cost * 0.015 * 2),
+    hair: HAIR[i % HAIR.length], skin: SKIN[i % SKIN.length], pants: PANTS[i % PANTS.length], hs: i % 4, glasses: i % 3 === 0, energy: 100, state: "work", seated: true, desk: i + 1, t: 0, x: 0, y: 0 }));
+  s.uid = 2000;
+  return s;
+}
+let S = freshState();
+const $ = id => document.getElementById(id);
+const rnd = (a, b) => a + Math.random() * (b - a);
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const fmt = n => {
+  const loc = lang === "it" ? "it-IT" : "en-US";
+  if (n >= 1e9) return (n / 1e9).toLocaleString(loc, { maximumFractionDigits: 2 }) + (lang === "it" ? " Mld" : "B");
+  if (n >= 1e6) return (n / 1e6).toLocaleString(loc, { maximumFractionDigits: 2 }) + (lang === "it" ? " Mln" : "M");
+  return Math.floor(n).toLocaleString(loc);
+};
+const euro = n => lang === "it" ? fmt(Math.max(0, n)) + " €" : "$" + fmt(Math.max(0, n));
+const owned = id => S.owned[id] || 0;
+const gprice = g => Math.ceil(g.base * Math.pow(g.grow, owned(g.id)));
+const xpNeed = l => Math.round(50 * Math.pow(1.5, l - 1));
+const title = l => TITLES[lang][Math.min(l - 1, TITLES[lang].length - 1)];
+const deskCount = () => OFFICES[S.office].desks;
+const teamSlots = () => deskCount() - 1;
+const snippets = () => SNIPPETS[lang];
+
+function charsMult() { return (1 + 0.25 * owned("monitor")) * (owned("vinyl") ? 1.15 : 1) * (1 + 0.25 * (S.stars || 0)); }
+function perKey() {
+  let k = (3 + 2 * owned("keyboard")) * charsMult() * (owned("phones") ? 1.25 : 1) * (owned("macro") ? 1.5 : 1);
+  if (S.boost > 0) k *= 1.5;
+  return Math.max(1, Math.round(k));
+}
+function memberCps(m) { if (m.state !== "work" || !m.seated || S.blackout > 0) return 0; return ROLES[m.role].cps * (0.3 + 0.7 * m.energy / 100) * charsMult(); }
+function teamCps() { return S.team.reduce((a, m) => a + memberCps(m), 0); }
+function hasRole(r) { return S.team.some(m => m.role === r && m.state === "work"); }
+function countRole(r) { return S.team.filter(m => m.role === r).length; }
+function payMult() { return (1 + 0.25 * (S.stars || 0)) * (1 + 0.06 * owned("plant")) * (owned("lamp") ? 1.12 : 1) * (owned("cat") ? 1.2 : 1) * (1 + 0.1 * countRole("designer")); }
+function salaries() { return S.team.reduce((a, m) => a + m.salary, 0); }
+function client(id) { return CLIENTS.find(c => c.id === id); }
+function cstate(id) { return S.clients[id] || (S.clients[id] = { rel: 55, lost: false, done: 0 }); }
+const cname = c => L(c.name);
+function jobTitle(j) { return j.cid ? L(client(j.cid).jobs)[j.ji || 0] : t("personal"); }
+
+/* ================= bacheca ================= */
+function makeOffer() {
+  const pool = CLIENTS.filter(c => c.lvl <= S.level && !cstate(c.id).lost && !(S.job && S.job.cid === c.id) && !S.offers.some(o => o.cid === c.id));
+  if (!pool.length) return { id: S.uid++, cid: null, ji: 0, tier: "p", lines: Math.round(10 * Math.pow(1.25, S.level - 1)), pay: Math.round(8 * Math.pow(1.3, S.level - 1)) };
+  const c = pick(pool);
+  const tier = pick(S.level >= 2 ? ["s", "m", "l"] : ["s", "m"]);
+  const tm = { s: [0.7, 1], m: [1, 1.06], l: [1.8, 1.15] }[tier];
+  const lines = Math.max(6, Math.round(14 * Math.pow(1.3, S.level - 1) * tm[0] * rnd(0.9, 1.15)));
+  const rate = 1.6 * (1 + 0.18 * (S.level - 1)) * tm[1] * (1 + 0.03 * Math.min(S.rep, 20));
+  return { id: S.uid++, cid: c.id, ji: Math.floor(Math.random() * 3), tier, lines, pay: Math.round(lines * rate) };
+}
+function fillOffers() { while (S.offers.length < 3) S.offers.push(makeOffer()); }
+
+function acceptOffer(id) {
+  if (S.job) { toast(t("finishFirst")); return; }
+  const o = S.offers.find(x => x.id === id); if (!o) return;
+  S.offers = S.offers.filter(x => x.id !== id);
+  const picky = o.cid ? client(o.cid).picky : 0;
+  const chance = o.cid ? 0.55 + 0.12 * picky : 0;
+  const triggers = [0.3, 0.68].filter(() => Math.random() < chance);
+  S.job = { ...o, done: 0, chat: [], pending: null, triggers, used: [] };
+  if (o.cid) {
+    const c = client(o.cid);
+    S.job.chat.push({ f: "c", t: L(c.hi) }, { f: "me", t: t("greet", { n: cname(c) }) });
+  } else S.job.chat.push({ f: "sys", t: t("noClientSys") });
+  fillOffers();
+  addLog(t("accepted", { j: esc(jobTitle(S.job)), c: o.cid ? t("forClient", { c: esc(L(client(o.cid).who)) }) : "" }));
+  renderJob(); renderPanel(); renderTut();
+}
+function abandonJob() {
+  const j = S.job; if (!j) return;
+  addLog(t("gaveUp", { j: esc(jobTitle(j)) }));
+  S.job = null;
+  if (j.cid) changeRel(j.cid, -30, t("gaveUpWords"));
+  renderJob(); renderPanel();
+}
+function changeRel(cid, d, lastWords) {
+  const st = cstate(cid);
+  if (d < 0 && hasRole("pm")) d = Math.round(d / 2);
+  st.rel = Math.max(0, Math.min(100, st.rel + d));
+  if (st.rel <= 0 && !st.lost) {
+    st.lost = true;
+    const c = client(cid);
+    S.rep = Math.max(0, S.rep - 3);
+    addLog(t("lostLog", { n: esc(cname(c)), w: esc(L(c.who)) }));
+    toast(t("lostToast", { n: cname(c), w: lastWords || "" }));
+    if (S.job && S.job.cid === cid) S.job = null;
+    S.offers = S.offers.filter(o => o.cid !== cid);
+    fillOffers();
+    renderJob(); renderPanel();
+  }
+}
+function moodOf(rel) {
+  const m = t("moods");
+  if (rel >= 70) return [m[0], "good", "var(--sage)"];
+  if (rel >= 40) return [m[1], "ok", "var(--sky)"];
+  if (rel >= 20) return [m[2], "meh", "var(--warm)"];
+  return [m[3], "bad", "var(--rose)"];
+}
+function maybeEvent() {
+  const j = S.job;
+  if (!j || !j.cid || j.pending != null || !j.triggers.length) return;
+  if (j.done / j.lines < j.triggers[0]) return;
+  j.triggers.shift();
+  let idx; do { idx = Math.floor(Math.random() * EVENTS.length); } while (j.used.includes(idx) && j.used.length < EVENTS.length);
+  j.used.push(idx); j.pending = idx;
+  j.chat.push({ f: "c", t: L(EVENTS[idx].text) });
+  ring();
+  toast(t("wrote", { n: cname(client(j.cid)) }));
+  renderJob();
+}
+function answer(i) {
+  const j = S.job; if (!j || j.pending == null) return;
+  const ev = EVENTS[j.pending], o = ev.opts[i], c = client(j.cid);
+  const ok = o.ok == null ? true : Math.random() < Math.max(0.1, o.ok - 0.12 * c.picky);
+  const fx = ok ? o.win : o.lose;
+  if (!o.silent) j.chat.push({ f: "me", t: L(o.l) });
+  j.chat.push({ f: o.silent ? "sys" : "c", t: L(ok ? o.wm : o.lm) });
+  j.pending = null;
+  if (fx.lines) j.lines = Math.round(j.lines * (1 + fx.lines));
+  if (fx.pay) j.pay = Math.round(j.pay * (1 + fx.pay));
+  if (fx.rep) S.rep += fx.rep;
+  if (fx.rel) changeRel(j.cid, fx.rel - (fx.rel < 0 ? c.picky * 3 : 0), L(ok ? o.wm : o.lm));
+  if (S.job && S.job.done >= S.job.lines) finishJob();
+  renderJob();
+}
+function finishJob() {
+  const j = S.job;
+  if (j.pending != null) { j.done = j.lines - 1; renderJob(); return; }
+  let pay = j.pay * payMult();
+  if (j.cid) { const st = cstate(j.cid); pay *= 0.85 + st.rel * 0.003; st.done++; }
+  const sal = salaries(), net = pay - sal;
+  if (S.money + net < 0) S.team.forEach(m => m.energy = Math.max(0, m.energy - 20));
+  S.money = Math.max(0, S.money + net); S.earned += pay; S.jobsDone++; S.rep += 1;
+  addLog(t("delivered", { j: esc(jobTitle(j)), p: euro(pay), s: sal ? t("salariesLog", { n: euro(sal) }) : "" }));
+  toast(t("deployed", { w: j.cid ? cname(client(j.cid)) : t("futureYou"), p: euro(net) }));
+  floatAt($("money"), "+" + euro(net));
+  chime();
+  S.job = null;
+  P.cheer = 1.2;
+  gainXp(Math.round(j.lines * 0.5));
+  if (j.cid) changeRel(j.cid, 8 + 5 * countRole("designer"));
+  renderJob(); renderPanel(); renderTut();
+}
+function gainXp(n) {
+  S.xp += n;
+  while (S.xp >= xpNeed(S.level)) {
+    S.xp -= xpNeed(S.level); S.level++;
+    const u = [
+      ...CLIENTS.filter(c => c.lvl === S.level).map(c => L(c.who)),
+      ...Object.values(ROLES).filter(r => r.lvl === S.level).map(r => L(r.name)),
+      ...GADGETS.filter(g => g.lvl === S.level).map(g => L(g.name)),
+      ...OFFICES.filter(o => o.lvl === S.level).map(o => L(o.name)),
+    ];
+    addLog(t("lvlLog", { n: S.level, t: title(S.level) }));
+    toast(t("lvlToast", { n: S.level, t: title(S.level) }) + (u.length ? t("unlocked", { u: u.slice(0, 3).join(", ") + (u.length > 3 ? "…" : "") }) : ""));
+    chime(1.2);
+    S.candidates = []; fillCandidates();
+    renderPanel();
+  }
+}
+
+/* ================= team ================= */
+function makeCandidate() {
+  const roles = Object.entries(ROLES).filter(([, r]) => r.lvl <= S.level);
+  if (!roles.length) return null;
+  const [role, r] = pick(roles);
+  const used = new Set([...S.team.map(m => m.name), ...S.candidates.map(m => m.name)]);
+  const name = pick(NAMES.filter(n => !used.has(n))) || pick(NAMES);
+  return { id: S.uid++, name, role, trait: Math.floor(Math.random() * TRAITS.length), cost: Math.round(r.cost * Math.pow(1.3, S.team.length) * rnd(0.9, 1.1)), salary: Math.max(2, Math.round(r.cost * 0.015 * (1 + 0.1 * S.level))),
+    hair: pick(HAIR), skin: pick(SKIN), pants: pick(PANTS), hs: Math.floor(Math.random() * 4), glasses: Math.random() < 0.3 };
+}
+function fillCandidates() { while (S.candidates.length < 3) { const c = makeCandidate(); if (!c) break; S.candidates.push(c); } }
+const traitOf = m => L(TRAITS[typeof m.trait === "number" ? m.trait : 0]);
+function hire(id) {
+  const c = S.candidates.find(x => x.id === id); if (!c) return;
+  if (S.team.length >= teamSlots()) { toast(t("noDesk")); return; }
+  if (S.money < c.cost) return;
+  S.money -= c.cost;
+  S.candidates = S.candidates.filter(x => x.id !== id);
+  const m = { ...c, energy: 100, state: "arrive", seated: false, desk: freeDesk(), t: 0, x: office.door.x, y: office.door.y };
+  S.team.push(m);
+  fillCandidates();
+  addLog(t("hired", { n: esc(m.name), r: L(ROLES[m.role].name) }));
+  toast(t("hiredToast", { n: m.name }));
+  chime(0.6); renderPanel();
+}
+function freeDesk() { for (let i = 1; i < deskCount(); i++) if (!S.team.some(m => m.desk === i)) return i; return 1; }
+function fire(id) {
+  const m = S.team.find(x => x.id === id); if (!m) return;
+  S.team = S.team.filter(x => x.id !== id);
+  addLog(t("left", { n: esc(m.name) })); renderPanel();
+}
+function sendBreak(m) { if (m.state !== "work") return; m.state = "toCoffee"; m.seated = false; }
+function breakAll() { S.team.forEach(sendBreak); renderPanel(); }
+
+/* ================= ufficio (mappa) ================= */
+let office = null;
+function buildOffice() {
+  const O = OFFICES[S.office], C = O.cols, R = O.rows;
+  const objs = [];
+  const perRow = Math.floor((C - 5) / 5) + 1;
+  for (let i = 0; i < O.desks; i++) {
+    const x = 2 + (i % perRow) * 5, y = 2.6 + Math.floor(i / perRow) * 4;
+    objs.push({ type: "desk", i, x, y, w: 2, h: 1, solid: true, spot: { x: x + 1, y: y + 1.45 }, label: i === 0 ? "desk" : null });
+  }
+  objs.push({ type: "coffee", x: C - 1.6, y: 1, w: 1.4, h: 1, solid: true, spot: { x: C - 0.9, y: 2.5 }, label: "coffee" });
+  objs.push({ type: "board", x: C - 5.6, y: 0.1, w: 2.2, h: 0.8, solid: false, spot: { x: C - 4.5, y: 1.5 }, label: "board" });
+  objs.push({ type: "shelf", x: 0.4, y: 0.1, w: 1.6, h: 0.8, solid: false, spot: { x: 1.2, y: 1.5 }, label: "shelf" });
+  if (S.office === 0) objs.push({ type: "bed", x: C - 3.2, y: R - 2.6, w: 2.8, h: 2.2, solid: true, spot: { x: C - 3.7, y: R - 1.5 }, label: "bed" });
+  else objs.push({ type: "sofa", x: C - 4.2, y: R - 1.5, w: 3, h: 1, solid: true, spot: { x: C - 2.7, y: R - 2.1 }, label: "sofa" });
+  if (owned("vinyl")) objs.push({ type: "vinyl", x: C / 2 - 3, y: R - 1.3, w: 1.2, h: 0.8, solid: true, spot: { x: C / 2 - 2.4, y: R - 1.9 }, label: "vinyl" });
+  if (owned("cat")) objs.push({ type: "cat", x: C / 2 - 0.5, y: R / 2 + 0.9, w: 1, h: 0.7, solid: false, spot: { x: C / 2, y: R / 2 + 2 }, label: "cat" });
+  const plantSpots = [[0.6, 2.2], [0.6, R - 0.8], [0.6, R / 2 + 0.6], [C / 2 + 1.6, R - 0.6], [C - 0.6, R / 2 + 0.4], [C / 2 - 1.4, R - 0.6]];
+  objs.push(...plantSpots.slice(0, owned("plant")).map(([x, y], i) => ({ type: "plant", x: x - 0.35, y: y - 0.35, w: 0.7, h: 0.7, solid: false, spot: { x: x + (x < 1 ? 0.7 : 0), y: y + (x < 1 ? 0 : -0.8) }, label: "plant", i })));
+  const windows = [];
+  for (let x = 2.8; x + 2 < C - 5.8; x += 3.6) windows.push(x);
+  office = { C, R, objs, windows, door: { x: C / 2, y: R - 0.6 } };
+  $("officeBox").style.aspectRatio = `${C} / ${R}`;
+  $("placeName").textContent = L(O.name);
+  S.team.forEach(m => { if (m.desk >= deskCount()) m.desk = freeDesk(); });
+}
+function deskOf(i) { return office.objs.find(o => o.type === "desk" && o.i === i); }
+
+const P = { x: 0, y: 0, seated: false, target: null, onArrive: null, stuck: 0, walkT: 0, dir: "down", moving: false, cheer: 0 };
+const keys = new Set();
+function blocked(x, y) {
+  const r = 0.28;
+  if (x < r || x > office.C - r || y < 1 + r || y > office.R - r) return true;
+  for (const o of office.objs) {
+    if (!o.solid) continue;
+    const cx = Math.max(o.x, Math.min(x, o.x + o.w)), cy = Math.max(o.y, Math.min(y, o.y + o.h));
+    if ((x - cx) ** 2 + (y - cy) ** 2 < r * r) return true;
+  }
+  return false;
+}
+function faceDir(dx, dy) { return Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "right" : "left") : (dy < 0 ? "up" : "down"); }
+function moveBy(dx, dy) {
+  let moved = false;
+  if (dx && !blocked(P.x + dx, P.y)) { P.x += dx; moved = true; }
+  if (dy && !blocked(P.x, P.y + dy)) { P.y += dy; moved = true; }
+  if (dx || dy) P.dir = faceDir(dx, dy);
+  return moved;
+}
+function standUp() { if (!P.seated) return; P.seated = false; P.dir = "down"; P.y += 0.35; if (blocked(P.x, P.y)) P.y += 0.3; syncSeat(); }
+function sit() {
+  const d = deskOf(0);
+  P.x = d.spot.x; P.y = d.spot.y; P.seated = true; P.target = null; P.dir = "up";
+  if (!S.satOnce) { S.satOnce = true; renderTut(); }
+  syncSeat();
+  $("editor").focus({ preventScroll: true });
+}
+function syncSeat() { $("standing").hidden = P.seated; $("seatbar").hidden = !P.seated; }
+function walkTo(obj) {
+  if (P.seated) standUp();
+  P.target = { x: obj.spot ? obj.spot.x : obj.x, y: obj.spot ? obj.spot.y : obj.y };
+  P.onArrive = obj.spot ? obj : null; P.stuck = 0;
+}
+function nearest() {
+  let best = null, bd = 1.5;
+  for (const o of [...office.objs.filter(o => o.label), ...S.team]) {
+    const ox = o.spot ? o.spot.x : o.x, oy = o.spot ? o.spot.y : o.y;
+    const d = Math.hypot(P.x - ox, P.y - oy);
+    if (d < bd) { bd = d; best = o; }
+  }
+  return best;
+}
+const labelOf = o => o.role ? t("talk", { n: o.name }) : t("labels")[o.label];
+
+let lastRead = -999, lastPet = -999, lastNap = -999;
+function interact(o) {
+  if (!o) return;
+  if (o.role) { talkTo(o); return; }
+  switch (o.type) {
+    case "desk": if (o.i === 0) sit(); break;
+    case "coffee":
+      if (S.boostCd > 0) { toast(t("coffeeWait", { n: Math.ceil(S.boostCd) })); break; }
+      S.boost = owned("espresso") ? 90 : 45; S.boostCd = 30; P.dir = "up"; S.stats.coffees++;
+      toast(owned("espresso") ? t("espressoToast") : t("mokaToast")); sip(); break;
+    case "board": setTab("board"); P.dir = "up"; toast(t("lookBoard")); break;
+    case "shelf":
+      P.dir = "up";
+      if (now() - lastRead < 90) { toast(t("readWait")); break; }
+      lastRead = now(); gainXp(5 + S.level * 2); toast(pick(t("reads"))); break;
+    case "bed":
+      if (now() - lastNap < 60) { toast(t("noSleep")); break; }
+      lastNap = now(); S.clock = (S.clock + 120) % 1440; toast(t("nap")); break;
+    case "sofa":
+      if (S.boostCd > 0) { toast(t("rested")); break; }
+      S.boost = Math.max(S.boost, 30); S.boostCd = 20; toast(t("sofa")); break;
+    case "vinyl": if (!music.on) setMusic(true); else toast(t("sideB")); break;
+    case "cat": lastPet = now(); S.stats.pets++; P.cheer = 0.8; purr(); toast(pick(t("cats"))); break;
+    case "plant": toast(t("water")); break;
+  }
+}
+function talkTo(m) {
+  P.dir = faceDir(m.x - P.x, m.y - P.y);
+  if (m.state !== "work") { toast(t("onBreak", { n: m.name })); return; }
+  if (m.energy < 35) { sendBreak(m); toast(t("needBreak", { n: m.name })); renderPanel(); return; }
+  m.energy = Math.min(100, m.energy + 10); m.wave = 1.2;
+  toast(`${m.name}: ${pick(t("chats")).replace("{j}", S.job ? jobTitle(S.job).toLowerCase() : t("refactor")).replace("{t}", traitOf(m))}`);
+}
+
+/* ================= scrittura ================= */
+let dirty = true, jobDirty = true, lastType = -9, lastBlackMsg = -9;
+function typeChars(n, fromHand) {
+  if (fromHand && S.blackout > 0) { if (now() - lastBlackMsg > 3) { lastBlackMsg = now(); toast(t("blackType")); } return; }
+  let budget = n;
+  const sn = snippets();
+  while (budget > 0) {
+    const src = sn[S.snip % sn.length];
+    if (S.pos >= src.length) { S.pos = 0; S.snip++; continue; }
+    const ch = src[S.pos++];
+    if (S.pos >= src.length) { S.pos = 0; S.snip++; }
+    budget--;
+    if (ch === "\n") { completeLine(); if (sn[S.snip % sn.length][S.pos] === "\n") budget++; }
+    else { S.lines[S.lines.length - 1] += ch; if (ch === " " && S.lines[S.lines.length - 1].trim() === "") budget++; }
+  }
+  dirty = true;
+  if (fromHand) { keyClick(); lastType = now(); }
+}
+function completeLine() {
+  const text = S.lines[S.lines.length - 1];
+  S.lines.push(""); S.lineNo++;
+  if (S.lines.length > 40) S.lines.splice(0, S.lines.length - 40);
+  if (text.trim() === "") return;
+  S.loc++; gainXp(1);
+  const j = S.job; if (!j) return;
+  if (j.pending != null && j.done >= j.lines - 1) return;
+  j.done++; jobDirty = true;
+  maybeEvent();
+  if (j.done >= j.lines) finishJob();
+}
+
+/* ================= interfaccia ================= */
+function splitComment(line) {
+  let q = null;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (q) { if (c === q) q = null; continue; }
+    if (c === '"' || c === "'" || c === "`") { q = c; continue; }
+    if (line.startsWith("//", i) || (c === "#" && line[i + 1] === " ") || line.startsWith("-- ", i)) return [line.slice(0, i), line.slice(i)];
+  }
+  return [line, ""];
+}
+function highlight(line) {
+  const [code, comment] = splitComment(line);
+  return code.split(/("[^"]*"?|'[^']*'?|`[^`]*`?)/).map((p, i) => i % 2 ? `<span class="s">${esc(p)}</span>` :
+    esc(p).replace(KW, '<span class="k">$1</span>').replace(/\b(\d+(?:\.\d+)?)\b/g, '<span class="nu">$1</span>').replace(/\b([a-zA-Z_]\w*)(?=\()/g, '<span class="fn">$1</span>')
+  ).join("") + (comment ? `<span class="cm">${esc(comment)}</span>` : "");
+}
+function renderEditor() {
+  const box = $("editor");
+  const rows = Math.max(6, Math.floor((box.clientHeight - 18) / (parseFloat(getComputedStyle(box).fontSize) * 1.6)));
+  const shown = S.lines.slice(-rows), first = S.lineNo - shown.length + 1;
+  $("code").innerHTML = shown.map((l, i) => `<div class="ln"><span class="n">${first + i}</span><span class="c">${highlight(l)}${i === shown.length - 1 ? '<span class="caret"></span>' : ""}</span></div>`).join("");
+  $("fileTab").textContent = FILES[lang][S.snip % FILES[lang].length];
+}
+function renderHud() {
+  $("money").textContent = euro(S.money);
+  $("lvlName").textContent = `${t("lv")} ${S.level} · ${title(S.level)}${S.stars ? " " + "★".repeat(Math.min(S.stars, 5)) : ""}`;
+  $("lvlXp").textContent = `${fmt(S.xp)} / ${fmt(xpNeed(S.level))} XP`;
+  $("xpBar").style.width = (100 * S.xp / xpNeed(S.level)).toFixed(1) + "%";
+  $("rep").textContent = S.rep;
+  $("sbLoc").textContent = `${fmt(S.loc)} ${t("lines")}`;
+  $("sbPower").textContent = `${perKey()} ${t("perKey")}`;
+  $("sbTeam").textContent = t("teamCps", { n: fmt(teamCps()) });
+  $("boost").textContent = S.boost > 0 ? t("coffeeOn", { n: Math.ceil(S.boost) }) : "";
+  const h = Math.floor(S.clock / 60) % 24, m = Math.floor(S.clock % 60);
+  const moment = t(h >= 21 || h < 5 ? "night" : h < 8 ? "dawn" : h < 18 ? "day" : "sunset");
+  const time = lang === "it" ? `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}` : `${(h % 12) || 12}:${String(m).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`;
+  $("status").textContent = `${time} · ${moment}${S.rain ? " · " + t("raining") : ""}`;
+}
+function renderTut() {
+  const el = $("tutCard");
+  if (S.jobsDone > 0) { el.hidden = true; return; }
+  el.hidden = false;
+  const done = [!!S.job, S.satOnce, false];
+  const nowIdx = done.indexOf(false);
+  el.innerHTML = `<h2>${t("tutTitle")}</h2><ol>${["tut1", "tut2", "tut3"].map((k, i) =>
+    `<li class="${done[i] ? "ok" : i === nowIdx ? "now" : ""}"><span class="chk">${done[i] ? "✓" : i + 1}</span><span>${t(k)}</span></li>`).join("")}</ol>`;
+}
+function renderJob() {
+  jobDirty = false;
+  const el = $("jobCard"), j = S.job;
+  if (!j) { el.innerHTML = `<h2>${t("job")}</h2><p class="empty">${t("noJob")}</p>`; return; }
+  const c = j.cid ? client(j.cid) : null, st = c ? cstate(c.id) : null, mood = st ? moodOf(st.rel) : null;
+  const chat = j.chat.slice(-4).map(m => `<div class="msg ${m.f}">${esc(m.t)}</div>`).join("");
+  const ev = j.pending != null ? EVENTS[j.pending] : null;
+  const choices = ev ? `<div class="choices">${ev.opts.map((o, i) => `<button type="button" data-act="answer" data-i="${i}"><span>${esc(L(o.l))}</span>${o.ok != null ? `<span class="odds">${t("risky")}</span>` : ""}</button>`).join("")}</div>` : "";
+  const est = j.pay * payMult() * (st ? 0.85 + st.rel * 0.003 : 1);
+  el.innerHTML = `<div class="job-top">
+      <span class="avatar" style="background:${c ? "var(--sky)" : "var(--line)"}">${c ? esc(cname(c)[0]) : "·"}</span>
+      <div style="min-width:0"><div class="eyebrow">${t("job")}</div><div class="job-name">${esc(jobTitle(j))}</div>
+      <div class="job-client">${c ? `${esc(cname(c))} · ${esc(L(c.who))}` : t("ownProject")}</div></div>
+    </div>
+    <div class="meters">
+      <div class="meter"><span>${t("progress")}</span><span class="track"><i id="jobBar" style="width:${(100 * j.done / j.lines).toFixed(1)}%;background:linear-gradient(90deg,var(--sage),var(--warm))"></i></span><span id="jobLines">${j.done} / ${j.lines}</span></div>
+      ${st ? `<div class="meter"><span>${t("mood")}</span><span class="track"><i style="width:${st.rel}%;background:${mood[2]}"></i></span><span class="pill ${mood[1]}">${mood[0]}</span></div>` : ""}
+    </div>
+    <div class="chat">${chat}${ev && j.done >= j.lines - 1 ? `<div class="msg sys">${t("replyFirst")}</div>` : ""}</div>
+    ${choices}
+    <div class="pay"><span>${t("estPay")}${salaries() ? ` · ${t("salaries", { n: euro(salaries()) })}` : ""}</span><b>${euro(est)}</b></div>
+    <div class="job-actions"><button type="button" class="small ghost" data-act="abandon">${t("abandon")}</button></div>`;
+}
+function updateJobBar() {
+  if (!S.job) return;
+  const b = $("jobBar"), l = $("jobLines");
+  if (b) b.style.width = (100 * S.job.done / S.job.lines).toFixed(1) + "%";
+  if (l) l.textContent = `${S.job.done} / ${S.job.lines}`;
+}
+
+let tab = "board";
+function renderTabs() {
+  const tired = S.team.filter(m => m.energy < 25 && m.state === "work").length;
+  const affordable = GADGETS.filter(g => S.level >= g.lvl && owned(g.id) < g.max && S.money >= gprice(g)).length;
+  const defs = [["board", "tBoard", t("tabBoard"), S.job ? 0 : S.offers.length], ["team", "tTeam", t("tabTeam"), tired], ["shop", "tShop", t("tabShop"), affordable], ["you", "tYou", t("tabYou"), 0], ["log", "tLog", t("tabLog"), 0]];
+  const sig = defs.map(d => d[0] + d[3]).join() + lang + tab;
+  const box = $("tabs");
+  if (box.dataset.sig === sig) return;
+  box.dataset.sig = sig;
+  box.innerHTML = defs.map(([id, ic, name, n]) => `<button type="button" role="tab" data-tab="${id}" aria-selected="${tab === id}">${ICONS[ic]}<span>${name}</span>${n ? `<span class="badge">${n}</span>` : ""}</button>`).join("");
+}
+$("tabs").addEventListener("click", e => { const b = e.target.closest("[data-tab]"); if (b) setTab(b.dataset.tab); });
+function setTab(x) { tab = x; renderTabs(); renderPanel(); }
+
+function renderPanel() {
+  const el = $("panel");
+  if (tab === "board") {
+    fillOffers();
+    const lost = CLIENTS.filter(c => cstate(c.id).lost).length;
+    el.innerHTML = `<div class="list">${S.offers.map(o => {
+      const c = o.cid ? client(o.cid) : null, st = c ? cstate(c.id) : null, mood = st ? moodOf(st.rel) : null;
+      return `<div class="row-item">
+        <span class="avatar" style="background:${c ? "var(--sky)" : "var(--line)"}">${c ? esc(cname(c)[0]) : "·"}</span>
+        <span><span class="tier ${o.tier}">${t("tiers")[o.tier]} · ${o.lines} ${t("lines")}</span><span class="t">${esc(jobTitle(o))}</span>
+        <span class="d">${c ? `${esc(cname(c))}, ${esc(L(c.who))} · ${st.done ? t("moodIs", { m: mood[0] }) : t("newClient")}${c.picky ? " · " + t("picky") : ""}` : t("noClient")}</span></span>
+        <span class="act"><span class="price">${euro(o.pay)}</span><button type="button" class="small primary" data-act="accept" data-id="${o.id}" ${S.job ? "disabled" : ""}>${t("accept")}</button></span>
+      </div>`; }).join("")}</div>
+      <div class="subhead mt"><span>${lost ? t("lostN", { n: lost }) : t("lost0")}</span><button type="button" class="small" data-act="refresh" id="refreshBtn">${t("more")}</button></div>`;
+  } else if (tab === "team") {
+    fillCandidates();
+    const slots = teamSlots();
+    const team = S.team.length ? S.team.map(m => {
+      const r = ROLES[m.role];
+      return `<div class="row-item">
+        <span class="avatar" style="background:${r.color}">${esc(m.name[0])}</span>
+        <span><span class="t">${esc(m.name)} <small>${L(r.name)}</small></span><span class="d">${esc(traitOf(m))} · ${t("salary", { n: euro(m.salary) })} · <span id="st-${m.id}"></span></span>
+        <span class="energy"><i id="en-${m.id}"></i></span></span>
+        <span class="act"><button type="button" class="small" data-act="break" data-id="${m.id}">${t("breakBtn")}</button><button type="button" class="small ghost" data-act="fire" data-id="${m.id}">${t("fireBtn")}</button></span>
+      </div>`; }).join("") : `<p class="empty">${t("solo")} ${S.level < 2 ? t("soloHint") : ""}</p>`;
+    const cands = S.level < 2 ? "" : S.candidates.map(c => {
+      const r = ROLES[c.role];
+      return `<div class="row-item">
+        <span class="avatar" style="background:${r.color}">${esc(c.name[0])}</span>
+        <span><span class="t">${esc(c.name)} <small>${L(r.name)} · ${fmt(r.cps)} ${t("cps")}</small></span><span class="d">${L(r.desc)} ${t("freeTime", { t: esc(traitOf(c)) })} ${t("salary", { n: euro(c.salary) })}.</span></span>
+        <span class="act"><span class="price">${euro(c.cost)}</span><button type="button" class="small primary" data-act="hire" data-id="${c.id}" data-cost="${c.cost}" ${S.team.length >= slots ? "data-block" : ""}>${t("hireBtn")}</button></span>
+      </div>`; }).join("");
+    el.innerHTML = `<div class="subhead"><span>${t("desks", { a: S.team.length, b: slots })}</span>${S.team.length ? `<button type="button" class="small" data-act="breakAll">${t("breakAll")}</button>` : ""}</div>
+      <div class="list">${team}</div>
+      ${S.level >= 2 ? `<div class="subhead mt"><span>${t("cvs")}</span><button type="button" class="small" data-act="cv" id="cvBtn">${t("moreCv")}</button></div><div class="list">${cands}</div>` : ""}
+      ${S.level >= 2 && S.team.length >= slots ? `<p class="empty" style="margin-top:10px">${t("full")}</p>` : ""}`;
+  } else if (tab === "shop") {
+    const next = OFFICES[S.office + 1];
+    const move = next ? `<div class="row-item ${S.level < next.lvl ? "lock" : ""}">
+        <span class="ico">${ICONS.house}</span>
+        <span><span class="t">${t("move", { n: L(next.name) })}</span><span class="d">${L(next.note)}${S.level < next.lvl ? " " + t("unlockAt", { n: next.lvl }) : ""}</span></span>
+        <span class="act"><span class="price">${euro(next.cost)}</span><button type="button" class="small primary" data-act="move" data-cost="${next.cost}" ${S.level < next.lvl ? "data-block" : ""}>${t("moveBtn")}</button></span>
+      </div>` : `<p class="empty">${t("bestOffice")}</p>`;
+    const gadgets = GADGETS.map(g => {
+      const n = owned(g.id), maxed = n >= g.max, locked = S.level < g.lvl;
+      return `<div class="row-item ${maxed ? "done" : ""} ${locked ? "lock" : ""}">
+        <span class="ico">${ICONS[g.icon]}</span>
+        <span><span class="t">${L(g.name)} ${n && g.max > 1 ? `<small>× ${n}</small>` : ""}</span><span class="d">${locked ? t("unlockAt", { n: g.lvl }) : L(g.desc)}</span></span>
+        <span class="act"><span class="price">${maxed ? t("taken") : euro(gprice(g))}</span>${maxed ? "" : `<button type="button" class="small" data-act="buy" data-id="${g.id}" data-cost="${gprice(g)}" ${locked ? "data-block" : ""}>${t("buy")}</button>`}</span>
+      </div>`; }).join("");
+    el.innerHTML = `<div class="list">${move}</div><div class="subhead mt"><span>${t("gadgets")}</span></div><div class="list">${gadgets}</div>`;
+  } else if (tab === "you") {
+    el.innerHTML = renderYou();
+  } else {
+    el.innerHTML = `<div class="log">${S.log.length ? S.log.map(l => `<div>${l}</div>`).join("") : `<div>${t("logEmpty")}</div>`}</div>`;
+  }
+  refreshButtons();
+}
+function renderYou() {
+  const lk = S.look, sw = (k, list) => `<div class="swatches">${list.map(c => `<button type="button" class="sw" style="background:${c}" data-act="look" data-k="${k}" data-v="${c}" aria-pressed="${lk[k] === c}" aria-label="${c}"></button>`).join("")}</div>`;
+  const opts = (k, names, cur, act) => `<div class="swatches">${names.map((n, i) => `<button type="button" class="opt" data-act="${act || "look"}" data-k="${k}" data-v="${i}" aria-pressed="${cur === i}">${n}</button>`).join("")}</div>`;
+  const st = t("st"), lost = CLIENTS.filter(c => cstate(c.id).lost).length;
+  const mins = Math.floor((S.stats.time || 0) / 60);
+  const stats = [[fmt(S.loc), st.loc], [fmt(S.jobsDone), st.jobs], [euro(S.earned), st.earned], [fmt(S.stats.bugs), st.bugs], [fmt(S.stats.coffees), st.coffees], [fmt(S.stats.pets), st.pets],
+    [fmt(S.stats.events), st.events], [fmt(S.stats.pomos), st.pomos], [mins >= 60 ? `${Math.floor(mins / 60)} h ${mins % 60} m` : `${mins} m`, st.time], [lost, st.lost]];
+  const got = ACH.filter(a => S.ach[a.id]).length;
+  const canP = S.office === 3 && S.level >= 8;
+  return `<div class="subhead"><span>${t("lookTitle")}</span></div>
+    <div class="style-grid">
+      <span>${t("shirt")}</span>${sw("shirt", SHIRTS)}
+      <span>${t("hair")}</span>${sw("hair", HAIR)}
+      <span>${t("hstyle")}</span>${opts("hs", t("hstyles"), lk.hs)}
+      <span>${t("skin")}</span>${sw("skin", SKIN)}
+      <span>${t("glasses")}</span>${opts("glasses", [t("no"), t("yes")], lk.glasses ? 1 : 0)}
+      <span>${t("floor")}</span>${opts("floor", t("floors"), S.decor.floor, "decor")}
+      <span>${t("rug")}</span><div class="swatches">${RUGS.map((c, i) => `<button type="button" class="sw" style="background:${c}" data-act="decor" data-k="rug" data-v="${i}" aria-pressed="${S.decor.rug === i}" aria-label="${c}"></button>`).join("")}</div>
+    </div>
+    <div class="subhead mt"><span>${t("statsTitle")}</span></div>
+    <div class="statgrid">${stats.map(([v, l]) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`).join("")}</div>
+    <div class="subhead mt"><span>${t("achTitle", { a: got, b: ACH.length })}</span></div>
+    <div class="ach">${ACH.map(a => `<div class="${S.ach[a.id] ? "got" : ""}"><b>${S.ach[a.id] ? "🏆 " : ""}${L(a.n)}</b>${L(a.d)}</div>`).join("")}</div>
+    <div class="subhead mt"><span>${t("prestTitle")} ${S.stars ? `<span class="stars">${"★".repeat(Math.min(S.stars, 10))}</span>` : ""}</span></div>
+    <div class="row-item ${canP ? "" : "lock"}" style="grid-template-columns:minmax(0,1fr) auto"><span><span class="d" style="margin:0">${t("prestDesc")}${canP ? "" : " " + t("prestLock")}</span></span>
+      <span class="act"><button type="button" class="small primary" data-act="prestige" ${canP ? "" : "disabled"}>${t("prestBtn")}</button></span></div>
+    <div class="subhead mt"><span>${t("saveTitle")}</span></div>
+    <div class="btnrow" style="margin-top:0"><button type="button" class="small" data-act="export">${t("exportBtn")}</button><button type="button" class="small" data-act="import">${t("importBtn")}</button></div>`;
+}
+function setLook(k, v) {
+  if (k === "hs") S.look.hs = +v;
+  else if (k === "glasses") S.look.glasses = v === "1";
+  else S.look[k] = v;
+  renderPanel(); save();
+}
+function setDecor(k, v) { S.decor[k] = +v; renderPanel(); save(); }
+function prestige() {
+  const keep = { stars: (S.stars || 0) + 1, ach: S.ach, stats: S.stats, look: S.look, decor: S.decor, rain: S.rain, clients: {} };
+  S = Object.assign(freshState(), keep);
+  S.earned = 0;
+  P.seated = false; P.x = 0;
+  boot(); seedFirst();
+  addLog(t("prestToast", { n: S.stars }));
+  toast(t("prestToast", { n: S.stars })); chime(1.4); save();
+}
+function packSave() { return JSON.stringify({ S: { ...S, team: S.team.map(({ look, headTop, ...m }) => m) }, P: { x: P.x, y: P.y, seated: P.seated } }); }
+function openDialog(html) { $("dialogCard").innerHTML = html; $("dialog").hidden = false; }
+function closeDialog() { $("dialog").hidden = true; }
+function exportSave() {
+  const code = btoa(unescape(encodeURIComponent(packSave())));
+  openDialog(`<h2>${t("exportBtn")}</h2><p class="empty" style="margin-bottom:8px">${t("exportDesc")}</p><textarea class="code" id="codeBox" readonly>${code}</textarea>
+    <div class="btnrow"><button type="button" class="primary small" data-d="copy">${t("copy")}</button><button type="button" class="small" data-d="close">${t("close")}</button></div>`);
+}
+function importSave() {
+  openDialog(`<h2>${t("importBtn")}</h2><p class="empty" style="margin-bottom:8px">${t("importDesc")}</p><textarea class="code" id="codeBox"></textarea>
+    <div class="btnrow"><button type="button" class="primary small" data-d="load">${t("load")}</button><button type="button" class="small" data-d="close">${t("close")}</button></div>`);
+  $("codeBox").focus();
+}
+$("dialog").addEventListener("click", e => {
+  if (e.target === $("dialog")) { closeDialog(); return; }
+  const b = e.target.closest("[data-d]"); if (!b) return;
+  if (b.dataset.d === "close") closeDialog();
+  if (b.dataset.d === "copy") {
+    const box = $("codeBox"); box.select();
+    (navigator.clipboard ? navigator.clipboard.writeText(box.value) : Promise.reject()).catch(() => document.execCommand && document.execCommand("copy"));
+    b.textContent = t("copied");
+  }
+  if (b.dataset.d === "load") {
+    let data = null;
+    try { data = JSON.parse(decodeURIComponent(escape(atob($("codeBox").value.trim())))); } catch (err) {}
+    if (!data || !data.S || typeof data.S.money !== "number") { toast(t("badCode")); return; }
+    load(data); boot(); save(); closeDialog(); toast(t("imported"));
+  }
+});
+
+/* ---------- imprevisti tranquilli ---------- */
+function chillEvent() {
+  const opts = ["catKeys", "rainbow", "review", "tip"];
+  if (S.team.length || S.job) opts.push("pizza");
+  if (S.level >= 2) opts.push("blackout");
+  const k = pick(opts), ev = t("ev");
+  S.stats.events++;
+  if (k === "blackout") { S.blackout = 12; toast(ev.blackout); }
+  else if (k === "catKeys") { const before = S.loc; typeChars(perKey() * 12 + 40, false); toast((owned("cat") ? ev.catKeys : ev.catKeysNo).replace("{n}", S.loc - before)); }
+  else if (k === "pizza") { S.team.forEach(m => m.energy = 100); P.cheer = 1.2; toast(S.job && S.job.cid ? ev.pizza.replace("{n}", cname(client(S.job.cid))) : ev.pizzaNo); }
+  else if (k === "rainbow") { S.boost = Math.max(S.boost, 40); toast(ev.rainbow); }
+  else if (k === "review") { S.rep += 2; toast(ev.review); }
+  else { const p = Math.round(20 * Math.pow(1.35, S.level - 1)); S.money += p; S.earned += p; toast(ev.tip.replace("{p}", euro(p))); floatAt($("money"), "+" + euro(p)); }
+  addLog("✨ " + esc($("toast").textContent));
+  ring();
+}
+function checkAch() {
+  for (const a of ACH) {
+    if (S.ach[a.id]) continue;
+    let ok = false; try { ok = a.ok(); } catch (e) {}
+    if (ok) { S.ach[a.id] = Date.now(); addLog(t("achLog", { n: esc(L(a.n)) })); setTimeout(() => toast("🏆 " + t("achGot", { n: L(a.n) })), 900); chime(0.8); if (tab === "you") renderPanel(); }
+  }
+}
+function memberStatus(m) { return m.state === "work" ? (m.seated ? t("stWork") : t("stGo")) : m.state === "arrive" ? t("stArrive") : t("stBreak"); }
+function refreshButtons() {
+  document.querySelectorAll("#panel [data-cost]").forEach(b => { b.disabled = b.hasAttribute("data-block") || S.money < +b.dataset.cost; });
+  const r = $("refreshBtn"); if (r) { r.disabled = S.boardCd > 0; r.textContent = S.boardCd > 0 ? t("moreIn", { n: Math.ceil(S.boardCd) }) : t("more"); }
+  const cv = $("cvBtn"); if (cv) { cv.disabled = S.cvCd > 0; cv.textContent = S.cvCd > 0 ? t("moreCvIn", { n: Math.ceil(S.cvCd) }) : t("moreCv"); }
+  if (tab === "team") S.team.forEach(m => {
+    const e = $("en-" + m.id); if (e) { e.style.width = m.energy + "%"; e.style.background = m.energy > 50 ? "var(--sage)" : m.energy > 25 ? "var(--warm)" : "var(--rose)"; }
+    const s = $("st-" + m.id); if (s) s.textContent = memberStatus(m);
+  });
+  renderTabs();
+}
+function buyGadget(id) {
+  const g = GADGETS.find(x => x.id === id); if (!g) return;
+  const p = gprice(g);
+  if (S.money < p || owned(id) >= g.max || S.level < g.lvl) return;
+  S.money -= p; S.owned[id] = owned(id) + 1;
+  addLog(t("bought", { n: L(g.name) }));
+  toast(id === "cat" ? t("catToast") : t("boughtToast", { n: L(g.name) }));
+  chime(0.5); buildOffice(); resize(); renderPanel(); save();
+}
+function moveOffice() {
+  const next = OFFICES[S.office + 1];
+  if (!next || S.level < next.lvl || S.money < next.cost) return;
+  S.money -= next.cost; S.office++;
+  buildOffice(); resize();
+  P.seated = false; P.x = office.door.x; P.y = office.door.y - 0.4; syncSeat();
+  S.team.forEach(m => { m.x = office.door.x; m.y = office.door.y; m.state = "arrive"; m.seated = false; });
+  addLog(t("movedLog", { n: L(next.name) }));
+  toast(t("movedToast", { n: L(next.name), d: next.desks }));
+  chime(1.2); renderPanel(); save();
+}
+
+$("panel").addEventListener("click", e => {
+  const b = e.target.closest("[data-act]"); if (!b || b.disabled) return;
+  const id = +b.dataset.id;
+  switch (b.dataset.act) {
+    case "accept": acceptOffer(id); break;
+    case "refresh": if (S.boardCd <= 0) { S.offers = []; fillOffers(); S.boardCd = 25; renderPanel(); } break;
+    case "hire": hire(id); break;
+    case "fire":
+      if (b.dataset.armed) fire(id);
+      else { b.dataset.armed = "1"; b.textContent = t("sure"); setTimeout(() => { if (b.isConnected) { delete b.dataset.armed; b.textContent = t("fireBtn"); } }, 2500); }
+      break;
+    case "break": { const m = S.team.find(x => x.id === id); if (m) { sendBreak(m); refreshButtons(); } break; }
+    case "breakAll": breakAll(); break;
+    case "cv": if (S.cvCd <= 0) { S.candidates = []; fillCandidates(); S.cvCd = 20; renderPanel(); } break;
+    case "buy": buyGadget(b.dataset.id); break;
+    case "move": moveOffice(); break;
+    case "look": setLook(b.dataset.k, b.dataset.v); break;
+    case "decor": setDecor(b.dataset.k, b.dataset.v); break;
+    case "export": exportSave(); break;
+    case "import": importSave(); break;
+    case "prestige":
+      if (b.dataset.armed) prestige();
+      else { b.dataset.armed = "1"; b.textContent = t("prestSure"); setTimeout(() => { if (b.isConnected) { delete b.dataset.armed; b.textContent = t("prestBtn"); } }, 3000); }
+      break;
+  }
+});
+$("jobCard").addEventListener("click", e => {
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  if (b.dataset.act === "answer") answer(+b.dataset.i);
+  if (b.dataset.act === "abandon") {
+    if (b.dataset.armed) abandonJob();
+    else { b.dataset.armed = "1"; b.textContent = t("abandonSure"); setTimeout(() => { if (b.isConnected) { delete b.dataset.armed; b.textContent = t("abandon"); } }, 3000); }
+  }
+});
+
+function addLog(html) { S.log.unshift(html); S.log = S.log.slice(0, 30); if (tab === "log") renderPanel(); }
+let toastT;
+function toast(msg) { const el = $("toast"); el.textContent = msg; el.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove("show"), 3400); }
+function floatAt(el, text) {
+  const r = el.getBoundingClientRect(), f = document.createElement("div");
+  f.className = "float"; f.textContent = text; f.style.left = (r.left + r.width / 2 - 20) + "px"; f.style.top = (r.top - 6) + "px";
+  document.body.appendChild(f); setTimeout(() => f.remove(), 1200);
+}
+
+/* ================= bug ================= */
+let bugTimer = 20, bugEl = null, bugAge = 0;
+function spawnBug() {
+  if (bugEl || (!P.seated && !S.team.length)) return;
+  const ed = $("editor");
+  bugEl = document.createElement("button");
+  bugEl.type = "button"; bugEl.className = "bug"; bugEl.setAttribute("aria-label", t("bugAria"));
+  bugEl.innerHTML = '<svg viewBox="0 0 32 32"><g stroke="#ec9a90" stroke-width="2" stroke-linecap="round"><path d="M10 12 5 9M22 12l5-3M9 17H4M23 17h5M10 22l-4 4M22 22l4 4"/></g><ellipse cx="16" cy="18" rx="7" ry="9" fill="#ec9a90"/><circle cx="16" cy="9" r="4" fill="#c56f68"/><path d="M16 11v16" stroke="#13111a" stroke-width="1.5"/></svg>';
+  bugEl.style.left = rnd(30, ed.clientWidth - 70) + "px"; bugEl.style.top = rnd(14, ed.clientHeight - 60) + "px";
+  bugEl.addEventListener("pointerdown", e => e.stopPropagation());
+  bugEl.addEventListener("click", e => { e.stopPropagation(); squashBug(null); });
+  ed.appendChild(bugEl); bugAge = 0;
+}
+function squashBug(who) {
+  if (!bugEl) return;
+  const bonus = Math.max(4, (S.job ? S.job.pay * 0.2 : 4 * S.level)) * (owned("duck") ? 2 : 1);
+  S.money += bonus; S.earned += bonus; S.stats.bugs++;
+  floatAt(bugEl, "+" + euro(bonus));
+  addLog(who ? t("bugBy", { n: esc(who), p: euro(bonus) }) : t("bugMe", { p: euro(bonus) }));
+  squish(); bugEl.remove(); bugEl = null;
+}
+
+/* ================= disegno ufficio ================= */
+const cv = $("room"), ctx = cv.getContext("2d");
+const dark = document.createElement("canvas"), dctx = dark.getContext("2d");
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const CANVAS_FONT = '"Shantell Sans", "Comic Neue", system-ui, sans-serif';
+let T = 40, W = 0, H = 0, DPR = 1, drops = [];
+function resize() {
+  DPR = Math.min(2, window.devicePixelRatio || 1);
+  const r = cv.getBoundingClientRect();
+  W = Math.max(1, r.width); H = Math.max(1, r.height);
+  cv.width = W * DPR; cv.height = H * DPR; dark.width = cv.width; dark.height = cv.height;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0); dctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  T = W / office.C;
+  drops = Array.from({ length: reduce ? 20 : 70 }, () => [Math.random(), Math.random(), rnd(0.6, 1)]);
+  dirty = true;
+}
+function skyColors(hour) {
+  const k = [[0, "#0f1024", "#2a2440"], [5, "#1c1a3a", "#5a3f5c"], [7, "#6f8fc0", "#f2c29b"], [12, "#7fb0dc", "#cfe3f0"], [18, "#5a5a9a", "#f2a77a"], [20, "#26244a", "#6b4a6a"], [24, "#0f1024", "#2a2440"]];
+  let a = k[0], b = k[1];
+  for (let i = 0; i < k.length - 1; i++) if (hour >= k[i][0] && hour <= k[i + 1][0]) { a = k[i]; b = k[i + 1]; break; }
+  const f = (hour - a[0]) / Math.max(1e-6, b[0] - a[0]);
+  return [mix(a[1], b[1], f), mix(a[2], b[2], f)];
+}
+function mix(c1, c2, f) {
+  const p = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16));
+  const A = p(c1), B = p(c2);
+  return "rgb(" + A.map((v, i) => Math.round(v + (B[i] - v) * f)).join(",") + ")";
+}
+function shade(hex, amt) {
+  const n = parseInt(hex.slice(1), 16);
+  const f = v => Math.max(0, Math.min(255, Math.round(v + amt)));
+  return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`;
+}
+function rrPath(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h, r) : ctx.rect(x, y, w, h); }
+const rr = (x, y, w, h, r, fill) => { rrPath(x, y, w, h, r); ctx.fillStyle = fill; ctx.fill(); };
+const circle = (x, y, r, fill) => { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = fill; ctx.fill(); };
+const ellipse = (x, y, rx, ry, fill) => { ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2); ctx.fillStyle = fill; ctx.fill(); };
+
+let tA = 0;
+function nightAmount() { const h = (S.clock / 60) % 24; return h >= 20 || h < 6 ? 1 : h < 8 ? (8 - h) / 2 : h > 18 ? (h - 18) / 2 : 0; }
+
+function drawOffice(dt) {
+  tA += dt;
+  const { C, R } = office;
+  const night = nightAmount();
+  for (let y = 1; y < R; y++) for (let x = 0; x < C; x++) {
+    const fl = FLOORS[S.decor.floor] || FLOORS[0];
+    ctx.fillStyle = (x + y * 3) % 5 === 0 ? fl[2] : ((y % 2) ? fl[0] : fl[1]);
+    ctx.fillRect(x * T, y * T, T + 1, T + 1);
+  }
+  ctx.strokeStyle = "rgba(0,0,0,.12)"; ctx.lineWidth = 1;
+  for (let y = 1; y < R; y++) { ctx.beginPath(); ctx.moveTo(0, y * T); ctx.lineTo(W, y * T); ctx.stroke(); }
+  const rug = RUGS[S.decor.rug] || RUGS[0];
+  rr((C / 2 - 2.2) * T, (R / 2 + 0.2) * T, 4.4 * T, 2.4 * T, T * 0.4, shade(rug, -16));
+  rr((C / 2 - 1.9) * T, (R / 2 + 0.5) * T, 3.8 * T, 1.8 * T, T * 0.3, rug);
+  ctx.fillStyle = "#2e2a3c"; ctx.fillRect(0, 0, W, T);
+  ctx.fillStyle = "#3a3550"; ctx.fillRect(0, T - 4, W, 4);
+  const [top, bot] = skyColors((S.clock / 60) % 24);
+  office.windows.forEach(wx => {
+    const x = wx * T, y = 0.12 * T, w = 2 * T, h = 0.72 * T;
+    const g = ctx.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, top); g.addColorStop(1, bot);
+    ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
+    if (S.rain) {
+      ctx.strokeStyle = "rgba(200,215,240,.45)"; ctx.lineWidth = 1; ctx.beginPath();
+      drops.forEach(d => { const dx = x + d[0] * w, dy = y + ((d[1] + tA * 0.5 * d[2]) % 1) * h; ctx.moveTo(dx, dy); ctx.lineTo(dx - 1, dy + 4); });
+      ctx.stroke();
+    } else if (night > 0.5) circle(x + w * 0.75, y + h * 0.35, T * 0.1, "rgba(245,236,210,.8)");
+    ctx.strokeStyle = "#4a4462"; ctx.lineWidth = 3; ctx.strokeRect(x, y, w, h);
+    ctx.beginPath(); ctx.moveTo(x + w / 2, y); ctx.lineTo(x + w / 2, y + h); ctx.stroke();
+  });
+  rr((office.door.x - 0.7) * T, (R - 0.12) * T, 1.4 * T, 0.12 * T, 2, "#8a6a55");
+
+  const items = [];
+  office.objs.forEach(o => items.push({ y: o.y + o.h, draw: () => drawObj(o) }));
+  S.team.forEach(m => items.push({ y: m.y + 0.01, draw: () => drawMember(m) }));
+  items.push({ y: P.y + 0.02, draw: () => drawPlayer() });
+  items.sort((a, b) => a.y - b.y).forEach(i => i.draw());
+
+  const black = S.blackout > 0;
+  if (night > 0.02 || black) {
+    dctx.globalCompositeOperation = "source-over";
+    dctx.clearRect(0, 0, W, H);
+    dctx.fillStyle = `rgba(12,10,32,${black ? 0.82 : 0.5 * night})`; dctx.fillRect(0, 0, W, H);
+    dctx.globalCompositeOperation = "destination-out";
+    const light = (x, y, r, a) => { const g = dctx.createRadialGradient(x * T, y * T, 0, x * T, y * T, r * T); g.addColorStop(0, `rgba(0,0,0,${a})`); g.addColorStop(1, "rgba(0,0,0,0)"); dctx.fillStyle = g; dctx.beginPath(); dctx.arc(x * T, y * T, r * T, 0, 7); dctx.fill(); };
+    if (black) light(P.x + 0.3, P.y - 0.5, 2.2 + Math.sin(tA * 9) * 0.08, 0.9);
+    else office.objs.filter(o => o.type === "desk").forEach(o => { const used = o.i === 0 ? P.seated : S.team.some(m => m.desk === o.i && m.seated); if (used) light(o.x + 1, o.y + 0.6, 2.2, 0.8); });
+    if (!black) {
+      if (owned("lamp")) light(deskOf(0).x + 0.2, deskOf(0).y + 0.3, 3.6, 0.95);
+      const cf = office.objs.find(o => o.type === "coffee"); light(cf.x + 0.7, cf.y + 0.5, 1.4, 0.6);
+      light(P.x, P.y - 0.3, 1.5, 0.45);
+    }
+    ctx.drawImage(dark, 0, 0, W, H);
+    if (black) {
+      const cx = (P.x + 0.3) * T, cy = (P.y - 0.5) * T;
+      rr(cx - 0.05 * T, cy, 0.1 * T, 0.22 * T, 2, "#efe8dc");
+      ellipse(cx, cy - 0.05 * T, 0.04 * T, 0.08 * T + Math.sin(tA * 12) * 0.01 * T, "#f4b86a");
+    } else if (owned("lamp")) {
+      const d = deskOf(0), g = ctx.createRadialGradient((d.x + 0.2) * T, (d.y + 0.3) * T, 0, (d.x + 0.2) * T, (d.y + 0.3) * T, 3.2 * T);
+      g.addColorStop(0, `rgba(244,184,106,${0.22 * night})`); g.addColorStop(1, "rgba(244,184,106,0)");
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    }
+  }
+  if (music.on && owned("vinyl") && !reduce) {
+    const v = office.objs.find(o => o.type === "vinyl");
+    if (v) { ctx.fillStyle = "rgba(244,184,106,.8)"; ctx.font = `${Math.round(T * 0.4)}px sans-serif`;
+      for (let i = 0; i < 3; i++) { const p = (tA * 0.3 + i / 3) % 1; ctx.globalAlpha = 1 - p; ctx.fillText(i % 2 ? "♪" : "♫", (v.x + 0.6 + Math.sin(p * 6 + i) * 0.3) * T, (v.y - p * 1.4) * T); }
+      ctx.globalAlpha = 1; }
+  }
+  if (!S.satOnce && !P.seated) {
+    const d = deskOf(0), bob = Math.sin(tA * 4) * 0.08 * T;
+    ctx.fillStyle = "#f4b86a"; ctx.beginPath();
+    const ax = (d.x + 1) * T, ay = (d.y - 0.25) * T + bob;
+    ctx.moveTo(ax - 0.18 * T, ay - 0.25 * T); ctx.lineTo(ax + 0.18 * T, ay - 0.25 * T); ctx.lineTo(ax, ay); ctx.fill();
+  }
+  // nomi e barre dei colleghi sopra a tutto, leggibili anche di notte
+  S.team.forEach(drawMemberHud);
+  if (!P.seated) { const n = nearest(); if (n) bubble(P.x, P.y - 1.45, ("ontouchstart" in window ? "" : t("E")) + labelOf(n)); }
+}
+
+function bubble(x, y, text) {
+  ctx.font = `600 ${Math.max(11, Math.round(T * 0.3))}px ${CANVAS_FONT}`;
+  const w = ctx.measureText(text).width + 16, h = Math.max(22, T * 0.52);
+  const bx = Math.max(4, Math.min(W - w - 4, x * T - w / 2));
+  const by = Math.max(4, y * T - h);
+  rr(bx, by, w, h, h / 2, "rgba(19,17,26,.9)");
+  ctx.fillStyle = "#efe8dc"; ctx.textBaseline = "middle"; ctx.fillText(text, bx + 8, by + h / 2 + 1); ctx.textBaseline = "alphabetic";
+}
+
+function drawObj(o) {
+  const x = o.x * T, y = o.y * T, w = o.w * T, h = o.h * T;
+  switch (o.type) {
+    case "desk": {
+      rr((o.x + 0.6) * T, (o.y + 1.0) * T, 0.8 * T, 0.62 * T, T * 0.16, owned("chair") ? "#3d5a7a" : "#5a4a58");
+      rr((o.x + 0.66) * T, (o.y + 1.36) * T, 0.68 * T, 0.18 * T, T * 0.08, owned("chair") ? "#4c6d92" : "#6b5a69");
+      rr(x, y + 0.08 * T, w, h, T * 0.1, "#5f463d");
+      rr(x, y, w, h * 0.92, T * 0.1, "#7a5b4e");
+      ctx.fillStyle = "#8d6b5b"; ctx.fillRect(x + 4, y + 3, w - 8, 3);
+      const used = S.blackout <= 0 && (o.i === 0 ? P.seated : S.team.some(m => m.desk === o.i && m.seated));
+      const mons = o.i === 0 ? 1 + owned("monitor") : 1;
+      for (let k = 0; k < mons; k++) {
+        const mw = 0.62 * T, mx = x + w / 2 - (mons * mw + (mons - 1) * 4) / 2 + k * (mw + 4);
+        rr(mx + mw / 2 - 0.06 * T, y + 0.42 * T, 0.12 * T, 0.12 * T, 2, "#2b2738");
+        rr(mx, y + 0.06 * T, mw, 0.4 * T, 4, "#13111a");
+        ctx.fillStyle = used ? `rgba(146,183,221,${0.65 + 0.1 * Math.sin(tA * 3 + k)})` : "#2a2738";
+        ctx.fillRect(mx + 3, y + 0.06 * T + 3, mw - 6, 0.4 * T - 6);
+        if (used) { ctx.fillStyle = "rgba(244,184,106,.85)"; for (let l = 0; l < 3; l++) ctx.fillRect(mx + 5, y + 0.06 * T + 6 + l * 4, (mw - 12) * (0.4 + ((l * 37 + Math.floor(tA * 2)) % 6) / 10), 1.5); }
+      }
+      rr(x + w / 2 - 0.36 * T, y + 0.62 * T, 0.72 * T, 0.2 * T, 3, "#cfc6d6");
+      ctx.fillStyle = "#a9a0b4"; for (let k = 0; k < 6; k++) ctx.fillRect(x + w / 2 - 0.3 * T + k * 0.1 * T, y + 0.66 * T, 0.06 * T, 0.04 * T);
+      if (o.i === 0) {
+        rr(x + w - 0.32 * T, y + 0.55 * T, 0.2 * T, 0.22 * T, 4, "#ec9a90");
+        if (!reduce) { ctx.strokeStyle = "rgba(239,232,220,.4)"; ctx.lineWidth = 1; ctx.beginPath(); for (let s = 0; s < 8; s++) { const sx = x + w - 0.22 * T + Math.sin(tA * 2 + s * 0.7) * 2; s ? ctx.lineTo(sx, y + 0.55 * T - s * 2) : ctx.moveTo(sx, y + 0.55 * T); } ctx.stroke(); }
+        if (owned("duck")) { ellipse(x + 0.22 * T, y + 0.72 * T, 0.13 * T, 0.09 * T, "#f2d066"); circle(x + 0.3 * T, y + 0.63 * T, 0.07 * T, "#f2d066"); circle(x + 0.32 * T, y + 0.62 * T, 0.015 * T, "#13111a"); }
+        if (owned("lamp")) circle(x + 0.2 * T, y + 0.3 * T, 0.14 * T, "#f4b86a");
+      }
+      break;
+    }
+    case "coffee": {
+      rr(x, y, w, h, 4, "#5c4a5a");
+      rr(x + 0.25 * T, y + 0.1 * T, 0.6 * T, 0.6 * T, 4, owned("espresso") ? "#b9b2c6" : "#8a8494");
+      ctx.fillStyle = "#13111a"; ctx.fillRect(x + 0.4 * T, y + 0.5 * T, 0.3 * T, 0.12 * T);
+      rr(x + 0.95 * T, y + 0.25 * T, 0.25 * T, 0.25 * T, 3, "#efe8dc");
+      if (S.team.some(m => m.state === "coffee") || S.boost > 0) { ctx.strokeStyle = "rgba(239,232,220,.45)"; ctx.lineWidth = 1.2; ctx.beginPath(); for (let s = 0; s < 10; s++) { const sx = x + 0.55 * T + Math.sin(tA * 2 + s * 0.6) * 3; s ? ctx.lineTo(sx, y + 0.1 * T - s * 2) : ctx.moveTo(sx, y + 0.1 * T); } ctx.stroke(); }
+      break;
+    }
+    case "board": {
+      rr(x, y, w, h, 3, "#a4805d");
+      const cols = ["#f2d066", "#9fcaa4", "#92b7dd", "#ec9a90"];
+      for (let i = 0; i < S.offers.length; i++) { ctx.fillStyle = cols[i % 4]; ctx.save(); ctx.translate(x + (0.35 + i * 0.6) * T, y + 0.4 * T); ctx.rotate((i - 1) * 0.12); ctx.fillRect(-0.2 * T, -0.2 * T, 0.4 * T, 0.4 * T); ctx.restore(); }
+      break;
+    }
+    case "shelf": {
+      rr(x, y, w, h, 3, "#5c4636");
+      const cols = ["#92b7dd", "#ec9a90", "#9fcaa4", "#f4b86a", "#b9a0da"];
+      for (let i = 0; i < 9; i++) { ctx.fillStyle = cols[i % 5]; ctx.fillRect(x + 4 + i * (w - 8) / 9, y + 4 + (i % 3) * 2, (w - 8) / 9 - 1.5, h - 8 - (i % 3) * 2); }
+      break;
+    }
+    case "bed": rr(x, y, w, h, 6, "#6f5a7a"); rr(x + 3, y + 3, w * 0.3, h - 6, 6, "#efe8dc"); rr(x + w * 0.35, y + 3, w * 0.62, h - 6, 6, "#92b7dd"); break;
+    case "sofa": rr(x, y, w, h, 8, "#6b5a8a"); rr(x + 4, y + 4, w - 8, h * 0.45, 6, "#7d6b9e"); break;
+    case "vinyl": {
+      rr(x, y, w, h, 4, "#5c4636");
+      circle(x + w * 0.45, y + h / 2, h * 0.38, "#13111a");
+      const a = music.on ? tA * 4 : 0; circle(x + w * 0.45 + Math.cos(a) * 1.5, y + h / 2 + Math.sin(a) * 1.5, h * 0.1, "#ec9a90");
+      break;
+    }
+    case "cat": {
+      const cx = (o.x + 0.5) * T, cy = (o.y + 0.4) * T, br = Math.sin(tA * 1.5) * 0.02 * T;
+      ctx.fillStyle = "#2b2735";
+      ctx.beginPath(); ctx.ellipse(cx, cy, 0.38 * T + br, 0.26 * T + br, 0, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx + 0.28 * T, cy - 0.1 * T, 0.16 * T, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(cx + 0.18 * T, cy - 0.2 * T); ctx.lineTo(cx + 0.22 * T, cy - 0.36 * T); ctx.lineTo(cx + 0.3 * T, cy - 0.24 * T); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(cx + 0.32 * T, cy - 0.24 * T); ctx.lineTo(cx + 0.42 * T, cy - 0.34 * T); ctx.lineTo(cx + 0.42 * T, cy - 0.16 * T); ctx.fill();
+      ctx.strokeStyle = "#2b2735"; ctx.lineWidth = 0.1 * T; ctx.lineCap = "round"; ctx.beginPath(); ctx.moveTo(cx - 0.34 * T, cy); ctx.quadraticCurveTo(cx - 0.5 * T, cy + 0.25 * T, cx - 0.1 * T + Math.sin(tA) * 0.05 * T, cy + 0.3 * T); ctx.stroke(); ctx.lineCap = "butt";
+      if (now() - lastPet < 2.5) { ctx.fillStyle = "#ec9a90"; ctx.font = `${Math.round(T * 0.35)}px sans-serif`; ctx.fillText("♥", cx + 0.2 * T, cy - 0.5 * T - (now() - lastPet) * 0.2 * T); }
+      break;
+    }
+    case "plant": {
+      const cx = (o.x + 0.35) * T, cy = (o.y + 0.35) * T;
+      circle(cx, cy, 0.22 * T, "#c97f5d");
+      ctx.fillStyle = "#9fcaa4";
+      for (let i = 0; i < 6; i++) { const a = i * 1.05 + Math.sin(tA * 0.7 + o.i) * 0.06; ctx.beginPath(); ctx.ellipse(cx + Math.cos(a) * 0.2 * T, cy + Math.sin(a) * 0.2 * T, 0.18 * T, 0.09 * T, a, 0, 7); ctx.fill(); }
+      break;
+    }
+  }
+}
+
+/* ---------- personaggi: piccoli chibi con faccia, capelli e camminata ---------- */
+// look: { shirt, pants, hair, skin, hs (stile capelli 0-3), glasses, phones, seed }
+function drawChibi(px, py, look, st) {
+  const s = T * 1.15;
+  const x = px * T, footY = py * T + 0.2 * s;
+  const walking = st.moving && !st.seated;
+  const ph = st.walkT * 10;
+  const step = walking ? Math.sin(ph) : 0;
+  const bounce = walking ? Math.abs(Math.sin(ph)) * 0.04 * s : Math.sin(tA * 2 + look.seed) * 0.008 * s;
+  const jump = st.cheer > 0 ? Math.sin((1.2 - st.cheer) / 1.2 * Math.PI * 2) * 0.12 * s * (st.cheer > 0 ? 1 : 0) : 0;
+  const dir = st.seated ? "up" : st.dir;
+  const side = dir === "left" ? -1 : dir === "right" ? 1 : 0;
+  const by = footY - bounce - Math.abs(jump);
+
+  // ombra
+  ellipse(x, footY, 0.26 * s, 0.08 * s, "rgba(0,0,0,.25)");
+
+  // gambe (nascoste se seduto)
+  if (!st.seated) {
+    const legW = 0.11 * s, legH = 0.2 * s, hipY = by - 0.2 * s;
+    const lx = side ? 0.04 * s * -side : 0.08 * s;
+    rr(x - lx - legW / 2, hipY + step * 0.04 * s, legW, legH - step * 0.04 * s, legW / 2, look.pants);
+    rr(x + lx - legW / 2, hipY - step * 0.04 * s, legW, legH + step * 0.04 * s, legW / 2, shade(look.pants, -12));
+    // scarpe
+    ellipse(x - lx, by - 0.005 * s + step * 0.02 * s, 0.07 * s, 0.035 * s, "#2a2433");
+    ellipse(x + lx, by - 0.005 * s - step * 0.02 * s, 0.07 * s, 0.035 * s, "#2a2433");
+  }
+
+  // corpo
+  const bodyTop = by - (st.seated ? 0.36 : 0.44) * s, bodyH = (st.seated ? 0.28 : 0.27) * s, bodyW = 0.4 * s;
+  // braccia
+  const armSwing = walking ? step * 0.05 * s : 0;
+  const typing = st.typing ? Math.sin(tA * 30) * 0.015 * s : 0;
+  const armY = bodyTop + 0.05 * s;
+  const wave = st.wave > 0;
+  if (side === 0) {
+    rr(x - bodyW / 2 - 0.06 * s, armY - armSwing + typing, 0.1 * s, 0.22 * s, 0.05 * s, shade(look.shirt, -18));
+    if (wave && dir !== "up") {
+      ctx.save(); ctx.translate(x + bodyW / 2 + 0.01 * s, armY + 0.04 * s); ctx.rotate(-2.4 + Math.sin(tA * 14) * 0.35);
+      rr(-0.05 * s, 0, 0.1 * s, 0.22 * s, 0.05 * s, shade(look.shirt, -18)); circle(0, 0.22 * s, 0.05 * s, look.skin); ctx.restore();
+    } else rr(x + bodyW / 2 - 0.04 * s, armY + armSwing - typing, 0.1 * s, 0.22 * s, 0.05 * s, shade(look.shirt, -18));
+    if (dir !== "up") { circle(x - bodyW / 2 - 0.01 * s, armY + 0.22 * s - armSwing + typing, 0.045 * s, look.skin); if (!wave) circle(x + bodyW / 2 + 0.01 * s, armY + 0.22 * s + armSwing - typing, 0.045 * s, look.skin); }
+  }
+  rr(x - bodyW / 2, bodyTop, bodyW, bodyH, 0.12 * s, look.shirt);
+  // dettaglio maglietta: colletto davanti, cappuccio dietro
+  if (dir === "down") { ctx.fillStyle = shade(look.shirt, 25); ctx.beginPath(); ctx.moveTo(x - 0.07 * s, bodyTop + 0.005 * s); ctx.lineTo(x, bodyTop + 0.07 * s); ctx.lineTo(x + 0.07 * s, bodyTop + 0.005 * s); ctx.fill(); }
+  if (dir === "up") rr(x - 0.12 * s, bodyTop - 0.01 * s, 0.24 * s, 0.1 * s, 0.05 * s, shade(look.shirt, -22));
+  if (side) { rr(x - 0.05 * s + side * 0.02 * s, armY - armSwing, 0.11 * s, 0.22 * s, 0.05 * s, shade(look.shirt, -18)); circle(x + side * 0.03 * s, armY + 0.22 * s - armSwing, 0.045 * s, look.skin); }
+
+  // testa
+  const hr = 0.25 * s, hx = x + side * 0.02 * s, hy = bodyTop - hr * 0.78;
+  // capelli lunghi dietro la testa
+  if (look.hs === 1) rr(hx - hr * 0.95, hy - hr * 0.2, hr * 1.9, hr * 1.35, hr * 0.5, shade(look.hair, -10));
+  if (look.hs === 2 && dir !== "down") circle(hx, hy - hr * 0.95, hr * 0.42, look.hair);
+  circle(hx, hy, hr, look.skin);
+  // orecchie
+  if (dir !== "up") { circle(hx - hr * 0.95 + (side > 0 ? hr * 0.3 : 0), hy + hr * 0.1, hr * 0.17, shade(look.skin, -12)); if (side <= 0 || side > 0) circle(hx + hr * 0.95 - (side < 0 ? hr * 0.3 : 0), hy + hr * 0.1, hr * 0.17, shade(look.skin, -12)); }
+  circle(hx, hy, hr, look.skin);
+
+  if (dir === "up") {
+    // vista da dietro: capelli coprono tutto
+    circle(hx, hy - hr * 0.02, hr * 1.02, look.hair);
+    ctx.strokeStyle = shade(look.hair, 18); ctx.lineWidth = 0.02 * s; ctx.beginPath(); ctx.arc(hx, hy - hr * 0.2, hr * 0.5, Math.PI * 1.1, Math.PI * 1.6); ctx.stroke();
+    if (look.hs === 2) circle(hx, hy - hr * 0.95, hr * 0.42, shade(look.hair, 8));
+  } else {
+    // faccia
+    const fx = hx + side * hr * 0.32;
+    const eyeY = hy + hr * 0.12, eyeDx = side ? hr * 0.22 : hr * 0.36;
+    const blink = ((tA + look.seed * 3.1) % 3.7) < 0.12;
+    const happy = st.cheer > 0 || st.wave > 0;
+    ctx.fillStyle = "#2a2030"; ctx.strokeStyle = "#2a2030"; ctx.lineWidth = 0.028 * s; ctx.lineCap = "round";
+    for (const e of side ? [side > 0 ? 1 : -1, side > 0 ? -0.2 : 0.2] : [-1, 1]) {
+      const ex = fx + e * eyeDx * (side ? (Math.abs(e) < 1 ? 1.4 : 1) : 1), r = hr * 0.11;
+      if (Math.abs(e) < 1) continue;
+      if (blink || happy) { ctx.beginPath(); ctx.arc(ex, eyeY + r * 0.3, r, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke(); }
+      else { ellipse(ex, eyeY, r * 0.85, r * 1.15, "#2a2030"); circle(ex + r * 0.3, eyeY - r * 0.4, r * 0.35, "#fff"); }
+    }
+    if (side) {
+      const ex = fx - side * eyeDx * 1.4, r = hr * 0.1;
+      if (blink || happy) { ctx.beginPath(); ctx.arc(ex, eyeY + r * 0.3, r, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke(); }
+      else ellipse(ex, eyeY, r * 0.7, r * 1.1, "#2a2030");
+    }
+    // guance
+    ctx.globalAlpha = 0.45;
+    circle(fx - (side ? -side * hr * 0.1 : hr * 0.55), eyeY + hr * 0.28, hr * 0.13, "#ec7a80");
+    if (!side) circle(fx + hr * 0.55, eyeY + hr * 0.28, hr * 0.13, "#ec7a80");
+    ctx.globalAlpha = 1;
+    // bocca
+    ctx.beginPath();
+    if (happy) { ctx.arc(fx, eyeY + hr * 0.3, hr * 0.14, 0.1 * Math.PI, 0.9 * Math.PI); ctx.fillStyle = "#7a3b45"; ctx.fill(); }
+    else { ctx.arc(fx, eyeY + hr * 0.25, hr * 0.09, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke(); }
+    ctx.lineCap = "butt";
+    // occhiali
+    if (look.glasses) {
+      ctx.strokeStyle = "#3a3048"; ctx.lineWidth = 0.022 * s;
+      const gs = side ? [fx + side * eyeDx] : [fx - eyeDx, fx + eyeDx];
+      gs.forEach(gx => { ctx.beginPath(); ctx.arc(gx, eyeY, hr * 0.2, 0, Math.PI * 2); ctx.stroke(); });
+      if (!side) { ctx.beginPath(); ctx.moveTo(fx - eyeDx + hr * 0.2, eyeY); ctx.lineTo(fx + eyeDx - hr * 0.2, eyeY); ctx.stroke(); }
+    }
+    // capelli davanti (frangia) secondo lo stile
+    ctx.fillStyle = look.hair;
+    ctx.beginPath(); ctx.arc(hx, hy - hr * 0.05, hr * 1.04, Math.PI * 0.98, Math.PI * 2.02); ctx.fill();
+    if (look.hs === 0) { // corti con ciuffo
+      ctx.beginPath(); ctx.ellipse(hx + side * hr * 0.2 - hr * 0.2, hy - hr * 0.3, hr * 0.55, hr * 0.28, -0.3, 0, Math.PI * 2); ctx.fill();
+    } else if (look.hs === 1) { // lunghi con frangia
+      ctx.beginPath(); ctx.ellipse(hx - side * hr * 0.1, hy - hr * 0.32, hr * 0.85, hr * 0.3, 0, 0, Math.PI * 2); ctx.fill();
+      if (side <= 0) rr(hx - hr * 1.02, hy - hr * 0.3, hr * 0.28, hr * 1.1, hr * 0.14, look.hair);
+      if (side >= 0) rr(hx + hr * 0.74, hy - hr * 0.3, hr * 0.28, hr * 1.1, hr * 0.14, look.hair);
+    } else if (look.hs === 2) { // chignon
+      ctx.beginPath(); ctx.ellipse(hx, hy - hr * 0.35, hr * 0.8, hr * 0.25, 0, 0, Math.PI * 2); ctx.fill();
+      circle(hx, hy - hr * 1.1, hr * 0.36, look.hair);
+    } else { // ricci
+      for (let k = -2; k <= 2; k++) circle(hx + k * hr * 0.38, hy - hr * 0.62 + Math.abs(k) * hr * 0.12, hr * 0.32, look.hair);
+    }
+    ctx.fillStyle = shade(look.hair, 30); ctx.globalAlpha = 0.5;
+    ctx.beginPath(); ctx.ellipse(hx - hr * 0.35, hy - hr * 0.68, hr * 0.22, hr * 0.08, -0.5, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
+  }
+  // cuffie
+  if (look.phones) {
+    ctx.strokeStyle = "#ec9a90"; ctx.lineWidth = 0.06 * s;
+    ctx.beginPath(); ctx.arc(hx, hy, hr * 1.08, Math.PI * 1.08, Math.PI * 1.92); ctx.stroke();
+    if (side >= 0) rr(hx + hr * 0.88, hy - hr * 0.15, hr * 0.3, hr * 0.5, hr * 0.12, "#ec9a90");
+    if (side <= 0) rr(hx - hr * 1.18, hy - hr * 0.15, hr * 0.3, hr * 0.5, hr * 0.12, "#ec9a90");
+  }
+  // tazza in mano durante la pausa
+  if (st.cup) { rr(x + bodyW / 2 - 0.02 * s, bodyTop + 0.12 * s, 0.12 * s, 0.13 * s, 0.03 * s, "#efe8dc"); ctx.fillStyle = "#6b4a35"; ctx.fillRect(x + bodyW / 2, bodyTop + 0.135 * s, 0.08 * s, 0.025 * s); }
+  return { headTop: hy - hr * 1.15 };
+}
+
+function drawPlayer() {
+  drawChibi(P.x, P.y, { pants: "#3d3a5c", seed: 0.3, ...S.look, phones: owned("phones") > 0 }, { seated: P.seated, dir: P.dir, moving: P.moving, walkT: P.walkT, typing: P.seated && now() - lastType < 0.3, cheer: P.cheer, wave: 0, cup: S.boost > 40 && !P.seated });
+}
+function memberLook(m) {
+  if (!m.look) m.look = { shirt: ROLES[m.role].color, pants: m.pants || PANTS[m.id % PANTS.length], hair: m.hair || HAIR[m.id % HAIR.length], skin: m.skin || SKIN[m.id % SKIN.length], hs: m.hs != null ? m.hs : m.id % 4, glasses: !!m.glasses, seed: (m.id * 1.37) % 5 };
+  return m.look;
+}
+function drawMember(m) {
+  m.headTop = drawChibi(m.x, m.y, memberLook(m), { seated: m.seated, dir: m.dir || "down", moving: !!m.moving, walkT: m.walk || 0, typing: m.seated && m.state === "work", cheer: 0, wave: m.wave || 0, cup: m.state === "coffee" }).headTop;
+}
+function drawMemberHud(m) {
+  const x = m.x * T, top = m.headTop || (m.y - 1) * T;
+  const bw = 0.6 * T;
+  rr(x - bw / 2, top - 8, bw, 5, 2.5, "rgba(19,17,26,.75)");
+  rr(x - bw / 2, top - 8, Math.max(3, bw * m.energy / 100), 5, 2.5, m.energy > 50 ? "#9fcaa4" : m.energy > 25 ? "#f4b86a" : "#ec9a90");
+  if (m.energy < 25 && m.seated && !reduce) { ctx.fillStyle = "#b9a0da"; ctx.font = `700 ${Math.round(T * 0.26)}px ${CANVAS_FONT}`; ctx.fillText("z", x + 0.32 * T, top - 10 - (tA * 8 % 8)); }
+  if (Math.hypot(P.x - m.x, P.y - m.y) < 2.4) {
+    ctx.font = `700 ${Math.max(10, Math.round(T * 0.24))}px ${CANVAS_FONT}`; ctx.textAlign = "center";
+    ctx.fillStyle = "rgba(19,17,26,.8)"; ctx.fillText(m.name, x + 1, top - 12); ctx.fillStyle = "#efe8dc"; ctx.fillText(m.name, x, top - 13); ctx.textAlign = "start";
+  }
+}
+
+/* ================= simulazione persone ================= */
+function stepToward(o, tx, ty, speed, dt) {
+  const dx = tx - o.x, dy = ty - o.y, d = Math.hypot(dx, dy);
+  if (d < 0.05) { o.x = tx; o.y = ty; o.moving = false; return true; }
+  const s = Math.min(d, speed * dt);
+  o.x += dx / d * s; o.y += dy / d * s; o.walk = (o.walk || 0) + dt; o.moving = true; o.dir = faceDir(dx, dy);
+  return false;
+}
+function updateTeam(dt) {
+  const cf = office.objs.find(o => o.type === "coffee");
+  const decay = owned("chair") ? 0.6 : 1;
+  S.team.forEach((m, i) => {
+    if (m.wave > 0) m.wave -= dt;
+    const d = deskOf(m.desk) || deskOf(1);
+    if (m.state === "arrive" || (m.state === "work" && !m.seated)) {
+      if (stepToward(m, d.spot.x, d.spot.y, 2.2, dt)) { m.state = "work"; m.seated = true; m.dir = "up"; }
+    } else if (m.state === "work") {
+      m.moving = false;
+      m.energy = Math.max(0, m.energy - dt * 0.55 * decay * (m.role === "senior" ? 0.5 : 1));
+    } else if (m.state === "toCoffee") {
+      if (stepToward(m, cf.spot.x - 0.5 - (i % 3) * 0.6, cf.spot.y + Math.floor(i / 3) * 0.6, 2.2, dt)) { m.state = "coffee"; m.t = owned("espresso") ? 8 : 14; m.dir = "down"; }
+    } else if (m.state === "coffee") {
+      m.moving = false;
+      m.t -= dt; m.energy = Math.min(100, m.energy + dt * 100 / (owned("espresso") ? 8 : 14));
+      if (m.t <= 0) { m.energy = 100; m.state = "work"; m.seated = false; }
+    }
+  });
+}
+function updatePlayer(dt) {
+  if (P.cheer > 0) P.cheer = Math.max(0, P.cheer - dt);
+  P.moving = false;
+  if (P.seated) return;
+  const sp = 3.2 * dt;
+  let dx = 0, dy = 0;
+  if (keys.has("left")) dx -= 1; if (keys.has("right")) dx += 1;
+  if (keys.has("up")) dy -= 1; if (keys.has("down")) dy += 1;
+  if (dx || dy) { P.target = null; P.onArrive = null; const l = Math.hypot(dx, dy); moveBy(dx / l * sp, dy / l * sp); P.walkT += dt; P.moving = true; return; }
+  if (!P.target) return;
+  const tx = P.target.x - P.x, ty = P.target.y - P.y, d = Math.hypot(tx, ty);
+  if (d < 0.12) { P.target = null; const o = P.onArrive; P.onArrive = null; if (o) interact(o); return; }
+  const s = Math.min(d, sp), bx = P.x, by = P.y;
+  moveBy(tx / d * s, ty / d * s); P.walkT += dt; P.moving = true;
+  if (Math.hypot(P.x - bx, P.y - by) < s * 0.2) {
+    if (!moveBy(0, Math.sign(ty || 1) * s)) moveBy(Math.sign(tx || 1) * s, 0);
+    P.stuck += dt;
+    if (P.stuck > 1.2) {
+      const o = P.onArrive; P.target = null; P.onArrive = null; P.stuck = 0;
+      if (o && Math.hypot(P.x - (o.spot ? o.spot.x : o.x), P.y - (o.spot ? o.spot.y : o.y)) < 1.6) interact(o);
+    }
+  } else P.stuck = 0;
+}
+
+/* ================= audio ================= */
+const music = { on: false, ctx: null, next: 0, step: 0, timer: null };
+function ensureCtx() {
+  if (music.ctx) return music.ctx;
+  const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null;
+  const c = new AC(); music.ctx = c;
+  music.master = c.createGain(); music.master.gain.value = 0.9 * prefs.vol / 70;
+  const lp = c.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 2400;
+  music.master.connect(lp); lp.connect(c.destination);
+  music.bus = c.createGain(); music.bus.gain.value = 0; music.bus.connect(music.master);
+  music.sfx = c.createGain(); music.sfx.gain.value = 0.5; music.sfx.connect(c.destination);
+  const buf = c.createBuffer(1, c.sampleRate * 2, c.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  music.noise = buf;
+  const rain = c.createBufferSource(); rain.buffer = buf; rain.loop = true;
+  const rf = c.createBiquadFilter(); rf.type = "bandpass"; rf.frequency.value = 900; rf.Q.value = 0.4;
+  music.rainGain = c.createGain(); music.rainGain.gain.value = 0;
+  rain.connect(rf); rf.connect(music.rainGain); music.rainGain.connect(c.destination); rain.start();
+  const cb = c.createBuffer(1, c.sampleRate * 3, c.sampleRate), cd = cb.getChannelData(0);
+  for (let i = 0; i < cd.length; i++) cd[i] = Math.random() < 0.0008 ? (Math.random() * 2 - 1) * 0.8 : 0;
+  const crack = c.createBufferSource(); crack.buffer = cb; crack.loop = true;
+  const cg = c.createGain(); cg.gain.value = 0.25; crack.connect(cg); cg.connect(music.bus); crack.start();
+  return c;
+}
+const hz = m => 440 * Math.pow(2, (m - 69) / 12);
+function note(tt, midi, dur, type, vol, dest, att) {
+  const c = music.ctx, o = c.createOscillator(), g = c.createGain();
+  const a = att || 0.04;
+  o.type = type; o.frequency.value = hz(midi); o.detune.value = (Math.random() - 0.5) * 12;
+  g.gain.setValueAtTime(0, tt); g.gain.linearRampToValueAtTime(vol, tt + a); g.gain.exponentialRampToValueAtTime(0.0008, tt + Math.max(dur, a + 0.1));
+  o.connect(g); g.connect(dest || music.bus); o.start(tt); o.stop(tt + Math.max(dur, a + 0.1) + 0.05);
+}
+function drum(tt, kind, vol) {
+  const c = music.ctx;
+  if (kind === "k") {
+    const o = c.createOscillator(), g = c.createGain();
+    o.frequency.setValueAtTime(110, tt); o.frequency.exponentialRampToValueAtTime(40, tt + 0.18);
+    g.gain.setValueAtTime(vol || 0.5, tt); g.gain.exponentialRampToValueAtTime(0.001, tt + 0.3);
+    o.connect(g); g.connect(music.bus); o.start(tt); o.stop(tt + 0.32);
+  } else {
+    const s = c.createBufferSource(); s.buffer = music.noise;
+    const f = c.createBiquadFilter(); f.type = kind === "h" ? "highpass" : "bandpass"; f.frequency.value = kind === "s" ? 1500 : kind === "r" ? 2800 : 6000;
+    if (kind === "r") f.Q.value = 6;
+    const g = c.createGain(), v = vol || (kind === "s" ? 0.22 : kind === "r" ? 0.3 : 0.05), len = kind === "s" ? 0.18 : kind === "r" ? 0.04 : 0.05;
+    g.gain.setValueAtTime(v, tt); g.gain.exponentialRampToValueAtTime(0.001, tt + len);
+    s.connect(f); f.connect(g); g.connect(music.bus); s.start(tt, Math.random()); s.stop(tt + len + 0.02);
+  }
+}
+const station = () => STATIONS[prefs.station % STATIONS.length];
+function scheduler() {
+  const c = music.ctx, st = station(), STEP = 60 / st.bpm / 2;
+  while (music.next < c.currentTime + 0.3) {
+    const tt = music.next + (music.step % 2 ? STEP * st.swing : 0);
+    const bar = Math.floor(music.step / 8) % 4, beat = music.step % 8;
+    if (beat === 0) {
+      st.chords[bar].forEach((m, i) => note(tt + i * (st.long ? 0.08 : 0.015), m, STEP * (st.long ? 9 : 7.5), st.cw, st.cv, null, st.att));
+      if (!st.bassPat) note(tt, st.bass[bar] - 12, STEP * 3.5, "sine", 0.22);
+    }
+    if (st.bassPat) { if (st.bassPat.includes(beat)) note(tt, st.bass[bar] - 12 + (beat >= 4 ? 7 : 0), STEP * 1.6, "sine", 0.2); }
+    else if (beat === 4) note(tt, st.bass[bar] - 12 + (bar % 2 ? 7 : 0), STEP * 3, "sine", 0.16);
+    if (st.kick.includes(beat)) drum(tt, "k", st.long ? 0.25 : 0.5);
+    if (st.snare.includes(beat)) drum(tt, "s");
+    if (st.rim && st.rim.includes(beat) && bar % 2 === 0) drum(tt, "r");
+    if (st.rim && [2, 5].includes(beat) && bar % 2 === 1) drum(tt, "r");
+    if (st.hat) drum(tt, "h", st.hat);
+    if (Math.random() < st.mc && beat % 2 === 0) note(tt, st.mel[Math.floor(Math.random() * st.mel.length)], STEP * (st.long ? 6 : 2.5), st.mw, st.mv || 0.05, null, st.long ? 0.3 : 0.04);
+    music.next += STEP; music.step++;
+  }
+}
+function setStation(i) {
+  prefs.station = (i + STATIONS.length) % STATIONS.length; savePrefs();
+  if (music.ctx) { music.step = 0; music.next = Math.max(music.next, music.ctx.currentTime + 0.05); }
+  if (!music.on) setMusic(true);
+  toast("♪ " + t("nowPlaying", { n: L(station().n) }));
+  syncSoundBtns(); renderRadio();
+}
+function setMusic(on) {
+  const c = ensureCtx(); if (!c) { toast(t("noAudio")); return; }
+  c.resume(); music.on = on;
+  music.bus.gain.cancelScheduledValues(c.currentTime); music.bus.gain.setTargetAtTime(on ? 0.55 : 0, c.currentTime, 0.4);
+  if (on && !music.timer) { music.next = c.currentTime + 0.1; music.timer = setInterval(scheduler, 80); }
+  if (!on && music.timer) { clearInterval(music.timer); music.timer = null; }
+  syncSoundBtns();
+}
+let rainAudio = false;
+function updateRainSound() { if (music.ctx) music.rainGain.gain.setTargetAtTime(S.rain && rainAudio ? 0.1 * prefs.rainVol / 50 : 0, music.ctx.currentTime, 0.5); }
+function syncSoundBtns() {
+  $("musicBtn").classList.toggle("on", music.on); $("musicBtn").setAttribute("aria-pressed", music.on);
+  $("musicTxt").textContent = music.on ? t("musicOn") : t("music"); $("musicBtn").title = t("music");
+  const on = S.rain && rainAudio;
+  $("rainBtn").classList.toggle("on", on); $("rainBtn").setAttribute("aria-pressed", on);
+  $("rainTxt").textContent = on ? t("rainOn") : t("rain"); $("rainBtn").title = t("rain");
+  $("nextBtn").title = t("next") + " · " + L(station().n); $("nextBtn").setAttribute("aria-label", t("next"));
+  $("radioTxt").textContent = t("radio");
+  if (!$("radio").hidden) renderRadio();
+}
+const audioOk = () => music.ctx && music.ctx.state === "running";
+let lastClick = 0;
+function keyClick() {
+  if (!audioOk()) return;
+  const tt = music.ctx.currentTime; if (tt - lastClick < 0.04) return; lastClick = tt;
+  const s = music.ctx.createBufferSource(); s.buffer = music.noise;
+  const f = music.ctx.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = rnd(2500, 4000); f.Q.value = 3;
+  const g = music.ctx.createGain(); g.gain.setValueAtTime(0.18, tt); g.gain.exponentialRampToValueAtTime(0.001, tt + 0.03);
+  s.connect(f); f.connect(g); g.connect(music.sfx); s.start(tt, Math.random()); s.stop(tt + 0.04);
+}
+function chime(v = 1) { if (!audioOk()) return; const tt = music.ctx.currentTime; [76, 79, 83].forEach((m, i) => note(tt + i * 0.09, m, 0.9, "sine", 0.06 * v, music.sfx)); }
+function ring() { if (!audioOk()) return; const tt = music.ctx.currentTime; [88, 84, 88].forEach((m, i) => note(tt + i * 0.12, m, 0.25, "sine", 0.05, music.sfx)); }
+function squish() { if (!audioOk()) return; const tt = music.ctx.currentTime; note(tt, 60, 0.15, "square", 0.03, music.sfx); note(tt + 0.06, 67, 0.2, "sine", 0.06, music.sfx); }
+function sip() { if (!audioOk()) return; const tt = music.ctx.currentTime; note(tt, 64, 0.3, "sine", 0.04, music.sfx); note(tt + 0.15, 71, 0.4, "sine", 0.04, music.sfx); }
+function purr() { if (!audioOk()) return; const c = music.ctx, tt = c.currentTime, o = c.createOscillator(), g = c.createGain(), l = c.createOscillator(), lg = c.createGain();
+  o.type = "sawtooth"; o.frequency.value = 45; l.frequency.value = 22; lg.gain.value = 0.03; l.connect(lg); lg.connect(g.gain);
+  g.gain.setValueAtTime(0.03, tt); g.gain.linearRampToValueAtTime(0, tt + 1.6); const f = c.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 300;
+  o.connect(f); f.connect(g); g.connect(music.sfx); o.start(tt); l.start(tt); o.stop(tt + 1.7); l.stop(tt + 1.7); }
+
+/* ================= modalità radio + pomodoro ================= */
+const POMO = { focus: 25 * 60, short: 5 * 60, long: 15 * 60 };
+const pomo = { phase: "focus", left: POMO.focus, running: false, n: 1 };
+const ICON_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>', ICON_PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>';
+function openRadio() {
+  $("radio").hidden = false; keys.clear();
+  if (P.seated) standUp();
+  if (!music.on) setMusic(true);
+  renderRadio(); $("rPlay").focus();
+}
+function closeRadio() { $("radio").hidden = true; }
+function renderRadio() {
+  if ($("radio").hidden) return;
+  $("stName").textContent = L(station().n);
+  $("stSub").textContent = t("radioSub");
+  $("rPlay").innerHTML = music.on ? ICON_PAUSE : ICON_PLAY; $("rPlay").setAttribute("aria-label", music.on ? t("pause") : t("play"));
+  $("rPrev").setAttribute("aria-label", t("prev")); $("rNext").setAttribute("aria-label", t("next"));
+  const box = $("stations");
+  const sig = prefs.station + lang;
+  if (box.dataset.sig !== sig) { box.dataset.sig = sig; box.innerHTML = STATIONS.map((x, i) => `<button type="button" data-st="${i}" aria-pressed="${i === prefs.station % STATIONS.length}">${esc(L(x.n))}</button>`).join(""); }
+  $("volMusicL").textContent = t("volMusic"); $("volRainL").textContent = t("volRain");
+  $("volMusic").value = prefs.vol; $("volRain").value = S.rain && rainAudio ? prefs.rainVol : 0;
+  $("pomoTitle").textContent = t("pomoTitle"); $("radioClose").textContent = t("back");
+  renderPomo();
+}
+function renderPomo() {
+  const m = Math.floor(pomo.left / 60), s = Math.floor(pomo.left % 60);
+  $("pomoTime").textContent = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  $("pomoPhase").textContent = pomo.phase === "focus" ? t("pomoFocus", { n: pomo.n }) : pomo.phase === "long" ? t("pomoLong") : t("pomoBreak");
+  const full = pomo.left === POMO[pomo.phase];
+  $("pomoGo").textContent = pomo.running ? t("pomoPause") : full ? t("pomoStart") : t("pomoResume");
+  $("pomoReset").textContent = t("pomoReset");
+  if (pomo.running || !full) document.title = `${$("pomoTime").textContent} · Lo-fi Dev`; else document.title = "Lo-fi Dev";
+}
+function tickPomo(dt) {
+  if (!pomo.running) return;
+  pomo.left -= dt;
+  if (pomo.left <= 0) {
+    if (pomo.phase === "focus") { S.stats.pomos++; pomo.phase = pomo.n % 4 === 0 ? "long" : "short"; toast(t("pomoDoneFocus")); }
+    else { pomo.phase = "focus"; pomo.n++; toast(t("pomoDoneBreak")); }
+    pomo.left = POMO[pomo.phase]; chime(1.3);
+    if (audioOk()) setTimeout(() => chime(1), 700);
+  }
+  if (!$("radio").hidden) renderPomo(); else if (Math.floor(pomo.left) !== Math.floor(pomo.left + dt)) renderPomo();
+}
+$("radioBtn").addEventListener("click", openRadio);
+$("radioClose").addEventListener("click", closeRadio);
+$("rPlay").addEventListener("click", () => setMusic(!music.on));
+$("rNext").addEventListener("click", () => setStation(prefs.station + 1));
+$("rPrev").addEventListener("click", () => setStation(prefs.station - 1));
+$("nextBtn").addEventListener("click", () => setStation(prefs.station + 1));
+$("stations").addEventListener("click", e => { const b = e.target.closest("[data-st]"); if (b) setStation(+b.dataset.st); });
+$("volMusic").addEventListener("input", e => {
+  prefs.vol = +e.target.value; savePrefs();
+  const c = ensureCtx(); if (c) { c.resume(); music.master.gain.setTargetAtTime(0.9 * prefs.vol / 70, c.currentTime, 0.1); }
+});
+$("volRain").addEventListener("input", e => {
+  const v = +e.target.value;
+  if (v > 0) { prefs.rainVol = v; savePrefs(); rainAudio = true; S.rain = true; } else S.rain = false;
+  const c = ensureCtx(); c && c.resume();
+  updateRainSound(); syncSoundBtns();
+});
+$("pomoGo").addEventListener("click", () => { pomo.running = !pomo.running; ensureCtx(); music.ctx && music.ctx.resume(); renderPomo(); });
+$("pomoReset").addEventListener("click", () => { pomo.running = false; pomo.phase = "focus"; pomo.left = POMO.focus; renderPomo(); });
+
+// finestra della radio: città di notte con la pioggia
+const rcv = $("radioCv"), rctx = rcv.getContext("2d");
+const towers = Array.from({ length: 14 }, (_, i) => ({ x: i / 14, w: rnd(0.04, 0.07), h: rnd(0.25, 0.6), win: Array.from({ length: 12 }, () => Math.random() < 0.35) }));
+const rdrops = Array.from({ length: 120 }, () => [Math.random(), Math.random(), rnd(0.6, 1.2)]);
+function drawRadio() {
+  if ($("radio").hidden) return;
+  const r = rcv.getBoundingClientRect(), w = r.width, h = r.height, d = Math.min(2, devicePixelRatio || 1);
+  if (rcv.width !== Math.round(w * d)) { rcv.width = Math.round(w * d); rcv.height = Math.round(h * d); }
+  rctx.setTransform(d, 0, 0, d, 0, 0);
+  const [top, bot] = skyColors((S.clock / 60) % 24);
+  const g = rctx.createLinearGradient(0, 0, 0, h); g.addColorStop(0, top); g.addColorStop(1, bot);
+  rctx.fillStyle = g; rctx.fillRect(0, 0, w, h);
+  const night = nightAmount();
+  if (night > 0.3) { rctx.fillStyle = "rgba(245,236,210,.85)"; rctx.beginPath(); rctx.arc(w * 0.8, h * 0.22, 14, 0, 7); rctx.fill(); }
+  towers.forEach((tw, i) => {
+    const x = tw.x * w, bw = tw.w * w + 8, bh = tw.h * h;
+    rctx.fillStyle = i % 2 ? "#1d1a2c" : "#25213a"; rctx.fillRect(x, h - bh, bw, bh);
+    tw.win.forEach((on, k) => { if (!on || night < 0.2) return; rctx.fillStyle = `rgba(244,184,106,${0.5 + 0.3 * Math.sin(tA * 0.5 + k + i)})`; rctx.fillRect(x + 4 + (k % 2) * (bw / 2 - 2), h - bh + 8 + Math.floor(k / 2) * 12, 4, 5); });
+  });
+  if (S.rain) {
+    rctx.strokeStyle = "rgba(200,215,240,.4)"; rctx.lineWidth = 1; rctx.beginPath();
+    rdrops.forEach(p => { const x = p[0] * w, y = ((p[1] + tA * 0.6 * p[2]) % 1) * h; rctx.moveTo(x, y); rctx.lineTo(x - 2, y + 9); });
+    rctx.stroke();
+  }
+  rctx.fillStyle = "#3a3352"; rctx.fillRect(w / 2 - 3, 0, 6, h); rctx.fillRect(0, h / 2 - 3, w, 6);
+  // gatto sul davanzale se c'è
+  if (owned("cat")) { rctx.fillStyle = "#13111a"; rctx.beginPath(); rctx.ellipse(w * 0.2, h - 10, 22, 12, 0, 0, 7); rctx.fill(); rctx.beginPath(); rctx.arc(w * 0.2 + 18, h - 22, 9, 0, 7); rctx.fill();
+    rctx.beginPath(); rctx.moveTo(w * 0.2 + 12, h - 28); rctx.lineTo(w * 0.2 + 14, h - 38); rctx.lineTo(w * 0.2 + 19, h - 30); rctx.moveTo(w * 0.2 + 20, h - 30); rctx.lineTo(w * 0.2 + 26, h - 37); rctx.lineTo(w * 0.2 + 26, h - 26); rctx.fill(); }
+}
+
+/* ================= modalità test (end game) ================= */
+function setEndgame(on) {
+  save();
+  endgame = on;
+  try { localStorage.setItem(MODE_KEY, on ? "end" : "normal"); } catch (e) {}
+  S = freshState(); P.seated = false; P.x = 0;
+  const had = load();
+  if (!had && on) S = endgameState();
+  boot();
+  if (!had && !on) seedFirst();
+  save();
+  toast(on ? t("endToast") : t("endBack"));
+}
+$("endBtn").addEventListener("click", () => setEndgame(!endgame));
+/* ================= input ================= */
+const now = () => performance.now() / 1000;
+const KEYMAP = { ArrowLeft: "left", a: "left", A: "left", ArrowRight: "right", d: "right", D: "right", ArrowUp: "up", w: "up", W: "up", ArrowDown: "down", s: "down", S: "down" };
+document.addEventListener("keydown", e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (!$("dialog").hidden) { if (e.key === "Escape") closeDialog(); return; }
+  if (!$("radio").hidden) {
+    if (e.key === "Escape") closeRadio();
+    else if (e.key === " " && !(e.target.closest && e.target.closest("button, input"))) { e.preventDefault(); setMusic(!music.on); }
+    return;
+  }
+  const onButton = e.target.closest && e.target.closest("button");
+  if (onButton && (e.key === " " || e.key === "Enter")) return;
+  if (e.key === "Tab") return;
+  if (P.seated) {
+    if (e.key === "Escape") { standUp(); return; }
+    if (e.repeat || (e.key.length > 1 && !["Enter", "Backspace", " "].includes(e.key) && !e.key.startsWith("Arrow"))) return;
+    e.preventDefault(); typeChars(perKey(), true); return;
+  }
+  const k = KEYMAP[e.key];
+  if (k) { keys.add(k); e.preventDefault(); return; }
+  if (!e.repeat && (e.key === "e" || e.key === "E" || e.key === "Enter" || e.key === " ")) { e.preventDefault(); interact(nearest()); }
+});
+document.addEventListener("keyup", e => { const k = KEYMAP[e.key]; if (k) keys.delete(k); });
+window.addEventListener("blur", () => keys.clear());
+
+cv.addEventListener("pointerdown", e => {
+  ensureCtx(); music.ctx && music.ctx.resume();
+  const r = cv.getBoundingClientRect();
+  const tx = (e.clientX - r.left) / T, ty = (e.clientY - r.top) / T;
+  const m = S.team.find(m => Math.hypot(m.x - tx, m.y - 0.45 - ty) < 0.55);
+  if (m) {
+    if (Math.hypot(P.x - m.x, P.y - m.y) < 1.5) interact(m);
+    else { if (P.seated) standUp(); P.target = { x: m.x + 0.7, y: m.y + 0.5 }; P.onArrive = m; P.stuck = 0; }
+    return;
+  }
+  const o = office.objs.find(o => o.label && tx >= o.x - 0.2 && tx <= o.x + o.w + 0.2 && ty >= o.y - 0.2 && ty <= o.y + o.h + 0.2);
+  if (o) { if (o.type === "desk" && P.seated) return; walkTo(o); return; }
+  if (P.seated) standUp();
+  P.target = { x: tx, y: Math.max(1.3, ty) }; P.onArrive = null; P.stuck = 0;
+});
+$("editor").addEventListener("pointerdown", e => { if (e.target.closest(".bug, button")) return; if (P.seated) typeChars(perKey(), true); });
+$("typeBtn").addEventListener("click", () => typeChars(perKey(), true));
+$("standBtn").addEventListener("click", standUp);
+$("goDesk").addEventListener("click", () => { ensureCtx(); music.ctx && music.ctx.resume(); walkTo(deskOf(0)); });
+$("musicBtn").addEventListener("click", () => setMusic(!music.on));
+$("rainBtn").addEventListener("click", () => {
+  if (!rainAudio) { rainAudio = true; S.rain = true; ensureCtx(); music.ctx && music.ctx.resume(); }
+  else S.rain = !S.rain;
+  syncSoundBtns(); updateRainSound(); save();
+});
+document.querySelectorAll("[data-lang]").forEach(b => b.addEventListener("click", () => setLang(b.dataset.lang, true)));
+let resetArmed = false;
+$("resetBtn").addEventListener("click", () => {
+  const b = $("resetBtn");
+  if (!resetArmed) { resetArmed = true; b.textContent = t("resetSure"); setTimeout(() => { resetArmed = false; b.textContent = endgame ? t("endReset") : t("reset"); }, 3000); return; }
+  resetArmed = false; b.textContent = endgame ? t("endReset") : t("reset");
+  P.seated = false; P.x = 0;
+  if (endgame) { S = endgameState(); boot(); } else { S = freshState(); boot(); seedFirst(); }
+  save(); toast(t("newGame"));
+});
+
+function setLang(l, remember) {
+  lang = l;
+  if (remember) { try { localStorage.setItem(LANG_KEY, l); } catch (e) {} }
+  document.documentElement.lang = l;
+  document.querySelectorAll("[data-lang]").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === l));
+  document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = t(el.dataset.i18n));
+  $("keysHint").innerHTML = t("keys");
+  $("standTxt").textContent = t("stand"); $("goDesk").textContent = t("goDesk");
+  $("typeBtn").textContent = t("tap"); $("standBtn").innerHTML = `${t("standUp")} <kbd>Esc</kbd>`;
+  $("footTxt").textContent = t("foot"); $("resetBtn").textContent = endgame ? t("endReset") : t("reset");
+  $("endBtn").textContent = endgame ? t("endOff") : t("endOn");
+  $("testPill").hidden = !endgame; $("testPill").textContent = t("testMode");
+  $("radioBtn").title = t("radioTitle");
+  $("editor").setAttribute("aria-label", t("editorLabel")); cv.setAttribute("aria-label", t("officeLabel"));
+  $("placeName").textContent = L(OFFICES[S.office].name);
+  if (S.pos >= snippets()[S.snip % snippets().length].length) S.pos = 0;
+  syncSoundBtns(); renderHud(); renderEditor(); renderTut(); renderJob(); $("tabs").dataset.sig = ""; renderTabs(); renderPanel();
+}
+
+/* ================= salvataggio ================= */
+function save() {
+  S.lastSeen = Date.now();
+  try { localStorage.setItem(saveKey(), packSave()); } catch (e) {}
+}
+function load(data) {
+  let src = data;
+  if (!src) { try { src = JSON.parse(localStorage.getItem(saveKey()) || "null"); } catch (e) { src = null; } }
+  if (src && src.S) {
+    S = Object.assign(freshState(), src.S);
+    S.stats = Object.assign(freshState().stats, src.S.stats || {});
+    S.look = Object.assign(freshState().look, src.S.look || {});
+    S.decor = Object.assign(freshState().decor, src.S.decor || {});
+    S.ach = src.S.ach || {};
+    if (src.P) Object.assign(P, src.P);
+  }
+  return !!(src && src.S);
+}
+
+/* ================= ciclo ================= */
+let last = performance.now(), acc = 0, saveAcc = 0, uiAcc = 0, achAcc = 0;
+function frame(tm) {
+  const dt = Math.min(0.1, (tm - last) / 1000); last = tm;
+  updatePlayer(dt); updateTeam(dt);
+  acc += teamCps() * dt;
+  if (acc >= 1) { const n = Math.floor(acc); acc -= n; typeChars(n, false); }
+  S.clock = (S.clock + dt * 2) % 1440;
+  S.boost = Math.max(0, S.boost - dt); S.boostCd = Math.max(0, S.boostCd - dt);
+  S.boardCd = Math.max(0, S.boardCd - dt); S.cvCd = Math.max(0, S.cvCd - dt);
+  S.stats.time += dt;
+  tickPomo(dt);
+  if (S.blackout > 0) { S.blackout -= dt; if (S.blackout <= 0) { S.blackout = 0; toast(t("ev").light); dirty = true; } }
+  if ($("radio").hidden && $("dialog").hidden && !document.hidden) { S.evT -= dt; if (S.evT <= 0) { S.evT = rnd(120, 240); if (S.jobsDone > 0) chillEvent(); } }
+  achAcc += dt; if (achAcc > 1) { achAcc = 0; checkAch(); }
+  drawRadio();
+  bugTimer -= dt;
+  if (bugTimer <= 0) { bugTimer = (owned("duck") ? 14 : 26) + rnd(0, 18); if (S.loc > 8) spawnBug(); }
+  if (bugEl) { bugAge += dt; const qa = S.team.find(m => m.role === "qa" && m.state === "work" && m.seated); if (qa && bugAge > 4) squashBug(qa.name); else if (bugAge > 14) { bugEl.remove(); bugEl = null; } }
+  if (dirty) { renderEditor(); dirty = false; }
+  if (jobDirty) { updateJobBar(); jobDirty = false; }
+  uiAcc += dt; if (uiAcc > 0.25) { uiAcc = 0; renderHud(); refreshButtons(); }
+  saveAcc += dt; if (saveAcc > 5) { saveAcc = 0; save(); }
+  ctx.clearRect(0, 0, W, H);
+  drawOffice(dt);
+  requestAnimationFrame(frame);
+}
+function boot() {
+  buildOffice();
+  if (!P.x || (!P.seated && blocked(P.x, P.y))) { P.x = office.door.x; P.y = office.door.y - 0.4; P.seated = false; }
+  if (P.seated) { const d = deskOf(0); P.x = d.spot.x; P.y = d.spot.y; P.dir = "up"; }
+  S.team.forEach(m => { const d = deskOf(m.desk) || deskOf(1); m.x = d.spot.x; m.y = d.spot.y; m.state = "work"; m.seated = true; m.dir = "up"; m.look = null; });
+  fillOffers(); fillCandidates();
+  resize(); syncSeat(); setLang(lang, false);
+}
+function seedFirst() {
+  S.offers = [{ id: S.uid++, cid: "rosa", ji: 0, tier: "s", lines: 10, pay: 18 }]; fillOffers();
+  renderPanel(); renderTut();
+  setTimeout(() => toast(t("welcome")), 500);
+}
+function start(data) {
+  const had = load(data);
+  if (!had && endgame) S = endgameState();
+  boot();
+  if (!had && !endgame) seedFirst();
+  else if (!data) {
+    const away = Math.min(7200, (Date.now() - (S.lastSeen || Date.now())) / 1000);
+    const cps = S.team.reduce((a, m) => a + ROLES[m.role].cps * 0.5 * charsMult(), 0);
+    if (away > 30 && cps > 0) {
+      const before = S.loc; typeChars(Math.floor(cps * away * 0.5), false);
+      S.team.forEach(m => m.energy = Math.max(10, m.energy - away / 4));
+      const n = S.loc - before;
+      if (n > 0) setTimeout(() => toast(t("away", { n: fmt(n) })), 600);
+      renderJob(); renderPanel();
+    }
+  }
+  requestAnimationFrame(tm => { last = tm; frame(tm); });
+}
+window.addEventListener("resize", () => office && resize());
+if (window.ResizeObserver) new ResizeObserver(() => office && resize()).observe($("officeBox"));
+document.addEventListener("visibilitychange", () => { if (document.hidden) save(); });
+window.addEventListener("pagehide", save);
+
+window.claude?.hot?.snapshot?.(() => JSON.parse(packSave()));
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? null);
+})();
+</script>
+</body>
+</html>
