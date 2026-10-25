@@ -382,6 +382,7 @@ textarea.code { width: 100%; min-height: 80px; resize: vertical; background: var
     <div class="mixer">
       <label for="volMusic" id="volMusicL"></label><input type="range" id="volMusic" min="0" max="100">
       <label for="volRain" id="volRainL"></label><input type="range" id="volRain" min="0" max="100">
+      <label for="volCrackle" id="volCrackleL"></label><input type="range" id="volCrackle" min="0" max="100">
     </div>
     <button type="button" class="primary close" id="radioClose"></button>
     <p class="hint"><span id="radioHint"></span></p>
@@ -447,7 +448,7 @@ const UI = {
     bugAria: "Schiaccia il bug", bugMe: "Bug schiacciato · +{p}", bugBy: "<b>{n}</b> ha schiacciato un bug · +{p}",
     away: "Mentre eri via il team ha scritto {n} righe. Sono un po' stanchi.", noAudio: "Questo browser non supporta l'audio.", newGame: "Nuova partita. Scrivania pulita.",
     radio: "Solo radio", radioTitle: "Radio lo-fi", radioHint: "Musica generata dal vivo nel browser, senza copyright. Lasciala andare mentre lavori.", toGame: "Entra nel gioco", volSnow: "Vento e neve",
-    play: "Play", pause: "Pausa", next: "Traccia successiva", prev: "Traccia precedente", volMusic: "Musica", volRain: "Pioggia", nowPlaying: "In onda: {n}",
+    play: "Play", pause: "Pausa", next: "Traccia successiva", prev: "Traccia precedente", volMusic: "Musica", volRain: "Pioggia", volCrackle: "Fruscio", nowPlaying: "In onda: {n}",
     testMode: "Modalità test", endOn: "Prova l'end game", endOff: "Torna alla tua partita", endReset: "Ricomincia end game", endToast: "Modalità test: tutto al massimo. La tua partita vera è al sicuro.", endBack: "Bentornato nella tua partita.",
     tabYou: "Tu", lookTitle: "Il tuo stile", shirt: "Maglia", hair: "Capelli", hstyle: "Taglio", skin: "Pelle", glasses: "Occhiali", floor: "Pavimento", rug: "Tappeto", yes: "Sì", no: "No",
     hstyles: ["Corti", "Lunghi", "Chignon", "Ricci"], floors: ["Parquet", "Piastrelle", "Bosco", "Moquette"],
@@ -502,7 +503,7 @@ const UI = {
     bugAria: "Squash the bug", bugMe: "Bug squashed · +{p}", bugBy: "<b>{n}</b> squashed a bug · +{p}",
     away: "While you were away the team wrote {n} lines. They're a bit tired.", noAudio: "This browser doesn't support audio.", newGame: "New game. Clean desk.",
     radio: "Radio only", radioTitle: "Lo-fi radio", radioHint: "Music generated live in your browser, copyright free. Leave it on while you work.", toGame: "Enter the game", volSnow: "Wind and snow",
-    play: "Play", pause: "Pause", next: "Next track", prev: "Previous track", volMusic: "Music", volRain: "Rain", nowPlaying: "Now playing: {n}",
+    play: "Play", pause: "Pause", next: "Next track", prev: "Previous track", volMusic: "Music", volRain: "Rain", volCrackle: "Crackle", nowPlaying: "Now playing: {n}",
     testMode: "Test mode", endOn: "Try the end game", endOff: "Back to your game", endReset: "Restart end game", endToast: "Test mode: everything maxed out. Your real game is safe.", endBack: "Welcome back to your game.",
     tabYou: "You", lookTitle: "Your style", shirt: "Shirt", hair: "Hair", hstyle: "Haircut", skin: "Skin", glasses: "Glasses", floor: "Floor", rug: "Rug", yes: "Yes", no: "No",
     hstyles: ["Short", "Long", "Bun", "Curly"], floors: ["Wood", "Tiles", "Forest", "Carpet"],
@@ -838,8 +839,9 @@ const ACH = [
 ];
 
 // stazioni della radio: ogni traccia è generata dal vivo con accordi, ritmo e timbri diversi
-const GAME_VERSION = "1.3";
+const GAME_VERSION = "1.4";
 const CHANGELOG = [
+  { v: "1.4", it: ["Quattro nuove stazioni radio: Tramonto anime, Garage rock, Jazz club e Neon notturno, ognuna con la sua scena.", "Nuovo cursore \"Fruscio\" nella radio per abbassare o togliere il crepitio del vinile."], en: ["Four new radio stations: Anime sunset, Garage rock, Jazz club and Neon drive, each with its own scene.", "New \"Crackle\" slider on the radio to turn the vinyl crackle down or off."] },
   { v: "1.3", it: ["Auto-code più veloce: ora scrive come 4 tasti al secondo.", "Nuovo PC delle novità in ufficio: è quello che stai leggendo.", "Pulsante \"Segnala un bug\" e stella su GitHub in fondo alla pagina e nella radio."], en: ["Faster Auto-code: it now types like 4 keys per second.", "New \"What's new\" PC in the office: you're reading it.", "\"Report a bug\" and \"Star on GitHub\" buttons at the bottom of the page and on the radio."] },
   { v: "1.2", it: ["Pulsante Auto-code alla scrivania, con il timer del lavoro.", "Nuovo upgrade nel negozio: Script di auto-code.", "La barra della scrivania ora si vede su tutti gli schermi, anche da telefono."], en: ["Auto-code button at the desk, with a job timer.", "New shop upgrade: Auto-code script.", "The desk bar is now visible on every screen, phones included."] },
   { v: "1.1", it: ["Radio lo-fi come schermata iniziale, con 8 stazioni e una scena per ognuna.", "Ogni ufficio ha il suo stile, più trofei, eventi tranquilli e prestigio."], en: ["Lo-fi radio as the start screen, with 8 stations and a scene for each.", "Every office has its own look, plus trophies, chill events and prestige."] },
@@ -878,6 +880,21 @@ const STATIONS = [
   { n: { it: "Treno di mezzanotte", en: "Midnight train" }, d: { it: "La città scorre dal finestrino, i pali passano veloci.", en: "The city slides past the window, poles rushing by." }, scene: "train", accent: "#e07a9a",
     bpm: 78, swing: 0.18, chords: [[45, 52, 55, 60], [41, 48, 52, 57], [48, 52, 55, 59], [43, 47, 50, 55, 59]], bass: [45, 41, 36, 43],
     mel: [69, 72, 76, 74, 72, 71, 69, 67, 64, 67], cw: "triangle", mw: "square", mc: 0.3, cv: 0.045, mv: 0.014, att: 0.03, kick: [0, 3, 5], snare: [2, 6], hat: 0.06 },
+  { n: { it: "Tramonto anime", en: "Anime sunset" }, d: { it: "Tetti di periferia, fili della luce e petali di ciliegio nel vento.", en: "Suburban rooftops, power lines and cherry petals in the wind." }, scene: "anime", accent: "#f49ac1",
+    bpm: 90, swing: 0.08, chords: [[53, 57, 60, 64], [55, 59, 62, 65], [52, 55, 59, 62], [57, 60, 64, 67]], bass: [41, 43, 40, 45],
+    mel: [76, 79, 81, 84, 81, 79, 76, 74, 72, 74, 76, 79], cw: "triangle", mw: "square", mc: 0.42, cv: 0.04, mv: 0.016, att: 0.02, kick: [0, 3, 4], snare: [2, 6], hat: 0.06,
+    arp: [0, 2, 4, 6], aw: "triangle", av: 0.03 },
+  { n: { it: "Garage rock", en: "Garage rock" }, d: { it: "Un amplificatore acceso, due luci sul palco e la sala prove tutta per te.", en: "An amp humming, two stage lights and the rehearsal room all to yourself." }, scene: "garage", accent: "#e8574f",
+    bpm: 96, swing: 0, chords: [[45, 52, 57, 60], [41, 48, 53, 57], [48, 55, 60, 64], [43, 50, 55, 59]], bass: [45, 41, 48, 43],
+    mel: [69, 72, 74, 76, 79, 76, 74, 72, 69, 67], cw: "triangle", mw: "sawtooth", mc: 0.22, cv: 0.02, mv: 0.02, att: 0.02, kick: [0, 3, 4], snare: [2, 6], hat: 0.08,
+    pw: [0, 1, 2, 3, 4, 5, 6, 7] },
+  { n: { it: "Jazz club", en: "Jazz club" }, d: { it: "Un'insegna al neon, fumo che sale piano e un pianoforte sotto la luce.", en: "A neon sign, slow curling smoke and a piano under the spotlight." }, scene: "jazz", accent: "#e0b45c",
+    bpm: 72, swing: 0.3, chords: [[50, 53, 57, 60, 64], [43, 53, 55, 59, 64], [48, 52, 55, 59, 62], [45, 49, 55, 58, 61]], bass: [38, 43, 36, 45],
+    mel: [74, 77, 76, 74, 72, 71, 69, 72, 76, 79], cw: "sine", mw: "triangle", mc: 0.34, cv: 0.05, att: 0.01, kick: [0], snare: [], rim: [2, 6], hat: 0.04, bassPat: [0, 2, 4, 6] },
+  { n: { it: "Neon notturno", en: "Neon drive" }, d: { it: "Sole a strisce, montagne viola e una griglia che corre verso l'orizzonte.", en: "A striped sun, purple mountains and a grid racing to the horizon." }, scene: "neon", accent: "#3df0ff",
+    bpm: 84, swing: 0, chords: [[45, 52, 57, 60], [41, 48, 53, 57], [43, 50, 55, 59], [40, 47, 52, 56]], bass: [45, 41, 43, 40],
+    mel: [81, 79, 76, 74, 76, 79, 84, 81], cw: "sawtooth", mw: "square", mc: 0.2, cv: 0.012, mv: 0.014, att: 0.25, kick: [0, 4], snare: [2, 6], hat: 0.05, long: true,
+    arp: [0, 1, 2, 3, 4, 5, 6, 7], aw: "sawtooth", av: 0.014 },
 ];
 
 /* ================= stato ================= */
@@ -886,7 +903,7 @@ let endgame = false;
 try { endgame = localStorage.getItem(MODE_KEY) === "end"; } catch (e) {}
 if (/[?&#]endgame\b/.test(location.search + location.hash)) endgame = true;
 const saveKey = () => endgame ? END_KEY : SAVE_KEY;
-let prefs = { station: 0, vol: 70, rainVol: 50 };
+let prefs = { station: 0, vol: 70, rainVol: 50, crackle: 25 };
 try { Object.assign(prefs, JSON.parse(localStorage.getItem(PREFS_KEY) || "{}")); } catch (e) {}
 const savePrefs = () => { try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch (e) {} };
 function freshState() {
@@ -2332,7 +2349,13 @@ function ensureCtx() {
   const cb = c.createBuffer(1, c.sampleRate * 3, c.sampleRate), cd = cb.getChannelData(0);
   for (let i = 0; i < cd.length; i++) cd[i] = Math.random() < 0.0008 ? (Math.random() * 2 - 1) * 0.8 : 0;
   const crack = c.createBufferSource(); crack.buffer = cb; crack.loop = true;
-  const cg = c.createGain(); cg.gain.value = 0.25; crack.connect(cg); cg.connect(music.bus); crack.start();
+  music.crackle = c.createGain(); music.crackle.gain.value = 0.25 * prefs.crackle / 50; crack.connect(music.crackle); music.crackle.connect(music.bus); crack.start();
+  // chitarra distorta per le stazioni rock
+  const ws = c.createWaveShaper(), curve = new Float32Array(1024);
+  for (let i = 0; i < 1024; i++) { const x = i / 511.5 - 1; curve[i] = Math.tanh(x * 6); }
+  ws.curve = curve; ws.oversample = "2x";
+  const dl = c.createBiquadFilter(); dl.type = "lowpass"; dl.frequency.value = 1800;
+  music.dist = c.createGain(); music.dist.gain.value = 1; music.dist.connect(ws); ws.connect(dl); dl.connect(music.bus);
   return c;
 }
 const hz = m => 440 * Math.pow(2, (m - 69) / 12);
@@ -2375,6 +2398,8 @@ function scheduler() {
     if (st.snare.includes(beat)) drum(tt, "s");
     if (st.rim && (bar % 2 === 0 || !st.bassPat ? st.rim.includes(beat) : [2, 5].includes(beat))) drum(tt, "r");
     if (st.hat) drum(tt, "h", st.hat);
+    if (st.arp && st.arp.includes(beat)) { const ch = st.chords[bar]; note(tt, ch[(beat + bar) % ch.length] + 12, STEP * 0.9, st.aw, st.av, null, 0.01); }
+    if (st.pw && st.pw.includes(beat)) { const r = st.bass[bar] - 12, acc = beat % 4 === 0 ? 1 : 0.6; [r, r + 7, r + 12].forEach(m => note(tt, m, STEP * (beat % 4 === 0 ? 0.9 : 0.45), "sawtooth", 0.05 * acc, music.dist, 0.005)); }
     if (Math.random() < st.mc && beat % 2 === 0) note(tt, st.mel[Math.floor(Math.random() * st.mel.length)], STEP * (st.long ? 6 : 2.5), st.mw, st.mv || 0.05, null, st.long ? 0.3 : 0.04);
     music.next += STEP; music.step++;
   }
@@ -2447,6 +2472,7 @@ function renderRadio() {
   const sig = prefs.station + lang;
   if (box.dataset.sig !== sig) { box.dataset.sig = sig; box.innerHTML = STATIONS.map((x, i) => `<button type="button" data-st="${i}" aria-pressed="${i === prefs.station % STATIONS.length}"><i style="background:${x.accent}"></i>${esc(L(x.n))}</button>`).join(""); }
   $("volMusicL").textContent = t("volMusic"); $("volRainL").textContent = st.scene === "snow" ? t("volSnow") : t("volRain");
+  $("volCrackleL").textContent = t("volCrackle"); $("volCrackle").value = prefs.crackle;
   $("volMusic").value = prefs.vol; $("volRain").value = S.rain && rainAudio ? prefs.rainVol : 0;
   $("radioClose").textContent = t("toGame"); $("radioHint").textContent = t("radioHint");
   $("radioTag").textContent = t("radioTitle");
@@ -2461,6 +2487,10 @@ $("stations").addEventListener("click", e => { const b = e.target.closest("[data
 $("volMusic").addEventListener("input", e => {
   prefs.vol = +e.target.value; savePrefs();
   const c = ensureCtx(); if (c) { c.resume(); music.master.gain.setTargetAtTime(0.9 * prefs.vol / 70, c.currentTime, 0.1); }
+});
+$("volCrackle").addEventListener("input", e => {
+  prefs.crackle = +e.target.value; savePrefs();
+  const c = ensureCtx(); if (c) { c.resume(); music.crackle.gain.setTargetAtTime(0.25 * prefs.crackle / 50, c.currentTime, 0.1); }
 });
 $("volRain").addEventListener("input", e => {
   const v = +e.target.value;
@@ -2589,6 +2619,64 @@ function drawScene(w, h, scene) {
       c.fillStyle = "rgba(244,184,106,.07)"; c.fillRect(0, 0, w, h);
       c.fillStyle = "#3a2c48"; c.fillRect(0, h * 0.8, w, h * 0.2);
       c.fillStyle = "rgba(244,184,106,.5)"; for (let x = (-(T0 * 220) % 60); x < w; x += 60) c.fillRect(x, h * 0.86, 22, 2);
+      break;
+    }
+    case "anime": {
+      c.fillStyle = grad(c, h, ["#4b3a78", "#e87a9a", "#ffc58f"]); c.fillRect(0, 0, w, h);
+      rcirc(w * 0.68, h * 0.66, 40, "rgba(255,240,200,.95)");
+      for (let i = 0; i < 4; i++) { const x = ((i * 0.31 + T0 * 0.008) % 1.3 - 0.15) * w; c.fillStyle = "rgba(255,214,220,.55)"; c.beginPath(); c.ellipse(x, h * (0.16 + i % 2 * 0.1), 46, 9, 0, 0, 7); c.fill(); }
+      for (let i = 0; i < 12; i++) { const x = i * w / 11 - 10, hh = h * (0.16 + (i * 29 % 9) / 60), ww = w / 11 + 4; c.fillStyle = i % 2 ? "#5a3f6b" : "#4d3560"; c.fillRect(x, h - hh, ww, hh); c.beginPath(); c.moveTo(x - 4, h - hh); c.lineTo(x + ww / 2, h - hh - 14); c.lineTo(x + ww + 4, h - hh); c.fill(); if (i % 3 === 1) { c.fillStyle = "rgba(255,214,150,.8)"; c.fillRect(x + ww * 0.3, h - hh + 10, 6, 6); } }
+      // palo della luce e fili
+      c.fillStyle = "#2b1f3d"; c.fillRect(w * 0.12, h * 0.12, 6, h * 0.88); c.fillRect(w * 0.12 - 18, h * 0.18, 42, 4); c.fillRect(w * 0.12 - 12, h * 0.26, 30, 3);
+      c.strokeStyle = "#2b1f3d"; c.lineWidth = 1.4; [0.18, 0.26].forEach((y, k) => { [-18, 24].forEach(dx => { c.beginPath(); c.moveTo(w * 0.12 + dx, h * y); c.quadraticCurveTo(w * 0.6, h * (y + 0.12 + k * 0.03), w * 1.05, h * (y - 0.06)); c.stroke(); }); });
+      // ringhiera del tetto
+      c.fillStyle = "#2b1f3d"; c.fillRect(0, h * 0.9, w, 4); for (let x = 6; x < w; x += 22) c.fillRect(x, h * 0.9, 3, h * 0.1);
+      R1.slice(0, 40).forEach((p, i) => { const x = ((p[0] + T0 * 0.03 * p[2]) % 1.1) * w, y = ((p[1] + T0 * 0.05 * p[2]) % 1) * h; c.save(); c.translate(x + Math.sin(T0 + i) * 10, y); c.rotate(T0 * p[2] + i); c.fillStyle = i % 3 ? "#ffd1e0" : "#ffb3cc"; c.beginPath(); c.ellipse(0, 0, 3.5, 2, 0, 0, 7); c.fill(); c.restore(); });
+      break;
+    }
+    case "garage": {
+      c.fillStyle = grad(c, h, ["#120c14", "#22141e", "#2e1a22"]); c.fillRect(0, 0, w, h);
+      c.fillStyle = "rgba(120,60,60,.12)"; for (let y = 0; y < h * 0.78; y += 14) for (let x = (y / 14) % 2 ? -14 : 0; x < w; x += 28) c.fillRect(x + 1, y + 1, 26, 12);
+      const beat = Math.abs(Math.sin(T0 * Math.PI * 96 / 60));
+      [[0.3, "rgba(232,87,79,"], [0.7, "rgba(244,184,106,"]].forEach(([px, col], k) => { const sway = Math.sin(T0 * 0.7 + k * 2) * 0.08; c.fillStyle = col + (0.16 + beat * 0.06) + ")"; c.beginPath(); c.moveTo(w * px - 6, 0); c.lineTo(w * (px + sway) - 70, h * 0.82); c.lineTo(w * (px + sway) + 70, h * 0.82); c.lineTo(w * px + 6, 0); c.fill(); rcirc(w * px, 4, 8, col + ".9)"); });
+      c.fillStyle = "#1b1116"; c.fillRect(0, h * 0.82, w, h * 0.18);
+      // amplificatore
+      const ax = w * 0.62, ay = h * 0.4, aw = w * 0.22, ah = h * 0.42;
+      c.fillStyle = "#151012"; c.fillRect(ax, ay, aw, ah); c.fillStyle = "#2a2226"; c.fillRect(ax + 6, ay + 22, aw - 12, ah - 28);
+      for (let k = 0; k < 2; k++) { const cx = ax + aw * (0.3 + k * 0.4), cy = ay + 22 + (ah - 28) / 2; rcirc(cx, cy, aw * 0.16 + beat * 2, "#0d0a0c"); rcirc(cx, cy, aw * 0.06, "#3a3036"); }
+      c.fillStyle = "#c9a96e"; for (let k = 0; k < 5; k++) rcirc(ax + 12 + k * 12, ay + 11, 3, "#c9a96e");
+      // asta del microfono e chitarra
+      c.strokeStyle = "#0b0709"; c.lineWidth = 3; c.beginPath(); c.moveTo(w * 0.3, h * 0.82); c.lineTo(w * 0.3, h * 0.45); c.lineTo(w * 0.36, h * 0.38); c.stroke(); rcirc(w * 0.365, h * 0.375, 5, "#0b0709");
+      c.fillStyle = "#3a1d24"; c.beginPath(); c.ellipse(ax - 16, h * 0.74, 16, 20, -0.2, 0, 7); c.fill(); c.fillRect(ax - 14, h * 0.4, 5, h * 0.32);
+      break;
+    }
+    case "jazz": {
+      c.fillStyle = grad(c, h, ["#0e0a14", "#1c1224", "#2a1830"]); c.fillRect(0, 0, w, h);
+      const fl = Math.random() < 0.02 ? 0.4 : 1;
+      c.save(); c.font = `italic 700 ${Math.round(h * 0.16)}px ${CANVAS_FONT}`; c.textAlign = "center"; c.shadowColor = "#ff7ab6"; c.shadowBlur = 18 * fl; c.fillStyle = `rgba(255,150,200,${0.9 * fl})`; c.fillText("jazz", w * 0.28, h * 0.3); c.shadowColor = "#7ae0ff"; c.fillStyle = `rgba(150,230,255,${0.85 * fl})`; c.font = `600 ${Math.round(h * 0.06)}px ${CANVAS_FONT}`; c.fillText("· open late ·", w * 0.28, h * 0.4); c.restore();
+      const sg = c.createRadialGradient(w * 0.68, h * 0.75, 10, w * 0.68, h * 0.75, h * 0.6); sg.addColorStop(0, "rgba(224,180,92,.35)"); sg.addColorStop(1, "rgba(224,180,92,0)"); c.fillStyle = sg; c.fillRect(0, 0, w, h);
+      // pianoforte a coda
+      c.fillStyle = "#08060a"; c.beginPath(); c.ellipse(w * 0.68, h * 0.72, w * 0.16, h * 0.08, 0, 0, 7); c.fill(); c.beginPath(); c.moveTo(w * 0.55, h * 0.7); c.lineTo(w * 0.62, h * 0.42); c.lineTo(w * 0.8, h * 0.66); c.fill();
+      c.fillRect(w * 0.56, h * 0.74, 4, h * 0.14); c.fillRect(w * 0.79, h * 0.74, 4, h * 0.14); c.fillStyle = "#efe8dc"; c.fillRect(w * 0.53, h * 0.69, w * 0.08, 4);
+      // tavolini con candela
+      [0.12, 0.35].forEach((x, k) => { c.fillStyle = "#08060a"; c.beginPath(); c.ellipse(w * x, h * 0.86, 30, 7, 0, 0, 7); c.fill(); c.fillRect(w * x - 2, h * 0.86, 4, h * 0.14); rcirc(w * x, h * 0.83 - Math.sin(T0 * 7 + k) * 1, 3, `rgba(255,200,120,${0.8 + Math.sin(T0 * 9 + k) * 0.15})`); });
+      c.strokeStyle = "rgba(220,210,230,.12)"; c.lineWidth = 6; for (let k = 0; k < 3; k++) { c.beginPath(); for (let s = 0; s < 20; s++) { const sx = w * (0.2 + k * 0.3) + Math.sin(T0 * 0.5 + s * 0.4 + k) * 18, sy = h * 0.8 - s * h * 0.035; s ? c.lineTo(sx, sy) : c.moveTo(sx, sy); } c.stroke(); }
+      break;
+    }
+    case "neon": {
+      c.fillStyle = grad(c, h, ["#0b0420", "#2a0b4a", "#7a1f6b"]); c.fillRect(0, 0, w, h);
+      R1.slice(0, 50).forEach((p, i) => { c.globalAlpha = 0.3 + 0.5 * Math.abs(Math.sin(T0 * p[2] + i)); c.fillStyle = "#fff"; c.fillRect(p[0] * w, p[1] * h * 0.5, 1.4, 1.4); }); c.globalAlpha = 1;
+      const hz0 = h * 0.62, sr = Math.min(w, h) * 0.24, sun = c.createLinearGradient(0, hz0 - sr * 2, 0, hz0); sun.addColorStop(0, "#ffd36e"); sun.addColorStop(1, "#ff4f9a");
+      c.save(); c.beginPath(); c.arc(w * 0.5, hz0, sr, Math.PI, 0); c.clip(); c.fillStyle = sun; c.fillRect(w * 0.5 - sr, hz0 - sr, sr * 2, sr);
+      c.fillStyle = "#2a0b4a"; for (let k = 0; k < 6; k++) { const y = hz0 - sr * 0.08 - k * sr * 0.14, th = 2 + (5 - k) * 1.2; c.fillRect(w * 0.5 - sr, y, sr * 2, th); } c.restore();
+      c.fillStyle = "#1a0633"; c.strokeStyle = "#ff4fd8"; c.lineWidth = 2; c.beginPath(); c.moveTo(0, hz0); [[0.08, 0.5], [0.18, 0.56], [0.3, 0.44], [0.4, hz0 / h]].forEach(([x, y]) => c.lineTo(w * x, h * y)); c.lineTo(w * 0.4, hz0); c.closePath(); c.fill(); c.stroke();
+      c.beginPath(); c.moveTo(w * 0.6, hz0); [[0.7, 0.46], [0.82, 0.54], [0.92, 0.42], [1, 0.5]].forEach(([x, y]) => c.lineTo(w * x, h * y)); c.lineTo(w, hz0); c.closePath(); c.fill(); c.stroke();
+      c.fillStyle = "#12042a"; c.fillRect(0, hz0, w, h - hz0);
+      c.strokeStyle = "rgba(61,240,255,.7)"; c.lineWidth = 1.2; c.beginPath();
+      for (let k = -12; k <= 12; k++) { c.moveTo(w * 0.5 + k * 8, hz0); c.lineTo(w * 0.5 + k * w * 0.12, h); }
+      const off = (T0 * 0.6) % 1; for (let k = 0; k < 8; k++) { const f = (k + off) / 8, y = hz0 + (h - hz0) * f * f; c.moveTo(0, y); c.lineTo(w, y); }
+      c.stroke();
+      [[0.1, 1], [0.9, -1]].forEach(([x, d]) => { c.strokeStyle = "#0a0218"; c.lineWidth = 5; c.beginPath(); c.moveTo(w * x, h); c.quadraticCurveTo(w * x + d * 6, h * 0.75, w * x + d * 12, h * 0.55); c.stroke(); c.lineWidth = 4; for (let k = 0; k < 5; k++) { const a = -2.6 + k * 0.55; c.beginPath(); c.moveTo(w * x + d * 12, h * 0.55); c.quadraticCurveTo(w * x + d * 12 + Math.cos(a) * 26, h * 0.55 + Math.sin(a) * 20 - 6, w * x + d * 12 + Math.cos(a) * 44, h * 0.55 + Math.sin(a) * 26 + 12); c.stroke(); } });
       break;
     }
   }
