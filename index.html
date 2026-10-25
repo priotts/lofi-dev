@@ -96,7 +96,9 @@ a.iconbtn:hover { color: var(--ink); border-color: var(--warm); }
 .left .office { flex: 0 1 auto; min-height: 280px; aspect-ratio: var(--ar, 12 / 8); }
 .left .monitor { flex: 1 1 190px; min-height: 190px; }
 .left .monitor .editor { flex: 1 1 auto; height: auto; min-height: 120px; }
-.right .tabcard { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.right .tabcard { flex: 1 1 auto; min-height: 280px; display: flex; flex-direction: column; }
+.right .tabcard .tabs { flex: none; }
+.right > .card:not(.tabcard) { flex: none; }
 .right .tabcard #panel { flex: 1 1 auto; min-height: 0; overflow: auto; margin-right: -8px; padding-right: 8px; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
 @media (max-width: 900px) {
   .main { grid-template-columns: minmax(0, 1fr); height: auto; }
@@ -172,7 +174,10 @@ kbd { font-family: var(--f-code); font-size: .86em; background: var(--panel-2); 
 .job-actions { display: flex; justify-content: flex-end; margin-top: 10px; }
 .empty { color: var(--muted); font-size: .9rem; margin: 0; }
 
-.tabs { display: flex; gap: 4px; margin-bottom: 12px; background: var(--bg-2); padding: 4px; border-radius: 12px; overflow-x: auto; }
+.tabs { display: flex; gap: 4px; margin-bottom: 12px; background: var(--bg-2); padding: 4px; border-radius: 12px; }
+.tabs button span.lbl { display: none; }
+.tabs button[aria-selected="true"] { flex: 2.4 1 auto; }
+.tabs button[aria-selected="true"] span.lbl { display: inline; }
 .tabs button { flex: 1; border: 0; background: transparent; color: var(--muted); padding: 7px 8px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-size: .86rem; font-weight: 600; white-space: nowrap; }
 .tabs button svg { width: 16px; height: 16px; flex: none; }
 .tabs button[aria-selected="true"] { background: var(--panel-2); color: var(--ink); }
@@ -215,6 +220,9 @@ kbd { font-family: var(--f-code); font-size: .86em; background: var(--panel-2); 
 .chip.badges { cursor: pointer; gap: 4px; padding: 6px 10px; font: inherit; color: var(--ink); }
 .coin { width: 26px; height: 26px; border-radius: 50%; display: inline-grid; place-items: center; font-size: 14px; line-height: 1; background: radial-gradient(circle at 35% 30%, #ffe2a8, #f4b86a 60%, #c98a3e); box-shadow: inset 0 -2px 0 rgba(0,0,0,.2), 0 0 0 2px color-mix(in srgb, #f4b86a 35%, transparent); }
 .coin.off { background: var(--panel-2); box-shadow: inset 0 0 0 2px var(--line); filter: grayscale(1); opacity: .5; }
+.chip.badges .tlab { display: grid; line-height: 1.1; text-align: left; margin: 0 6px 0 2px; }
+.chip.badges .tlab b { font-size: .8rem; font-weight: 700; } .chip.badges .tlab small { font-size: .72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.coin.mini { width: 22px; height: 22px; font-size: 12px; margin-left: -6px; }
 .chip.badges .more { font-size: .78rem; color: var(--muted); margin-left: 4px; font-variant-numeric: tabular-nums; }
 .ach .coin { width: 34px; height: 34px; font-size: 18px; flex: none; }
 .testpill { white-space: nowrap; font-size: .7rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--warm-ink); background: var(--lilac); border-radius: 99px; padding: 2px 9px; }
@@ -247,6 +255,7 @@ textarea.code { width: 100%; min-height: 80px; resize: vertical; background: var
 .radio-head b span { color: var(--warm); }
 .radio-head .tag { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); border: 1px solid var(--line); border-radius: 99px; padding: 2px 9px; }
 .radio .hint { margin: -6px 0 0; color: var(--faint); font-size: .8rem; }
+.radio .hint.gh { margin-top: -10px; } .radio .hint.gh .madeby { font-size: .86rem; }
 .stations button i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
 .radio-win { position: relative; height: 280px; border-radius: 22px; overflow: hidden; border: 6px solid #3a3352; box-shadow: 0 30px 60px -30px #000; }
 .radio-win canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -358,7 +367,8 @@ textarea.code { width: 100%; min-height: 80px; resize: vertical; background: var
       <label for="volRain" id="volRainL"></label><input type="range" id="volRain" min="0" max="100">
     </div>
     <button type="button" class="primary close" id="radioClose"></button>
-    <p class="hint"><span id="radioHint"></span> <a class="madeby" href="https://github.com/priotts" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg>priotts</a></p>
+    <p class="hint"><span id="radioHint"></span></p>
+    <p class="hint gh"><a class="madeby" href="https://github.com/priotts" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg>priotts</a></p>
   </div>
 </div>
 <div class="dialog" id="dialog" hidden><section class="card" id="dialogCard"></section></div>
@@ -395,7 +405,7 @@ const UI = {
     tabBoard: "Bacheca", tabTeam: "Team", tabShop: "Negozio", tabLog: "Diario",
     tiers: { s: "Piccolo", m: "Medio", l: "Grande", p: "Personale" },
     newClient: "cliente nuovo", moodIs: "umore {m}", picky: "esigente", noClient: "Nessun cliente, nessuna sorpresa", accept: "Accetta",
-    clients: "I tuoi clienti", lostTag: "perso", jobsN: "{n} lavori insieme", lostN: "Clienti persi: {n}", lost0: "Nessun cliente perso, per ora", more: "Cerca altri lavori", moreIn: "Cerca altri lavori ({n} s)",
+    trophies: "Trofei", clients: "I tuoi clienti", lostTag: "perso", jobsN: "{n} lavori insieme", lostN: "Clienti persi: {n}", lost0: "Nessun cliente perso, per ora", more: "Cerca altri lavori", moreIn: "Cerca altri lavori ({n} s)",
     stWork: "al lavoro", stGo: "va alla scrivania", stArrive: "sta arrivando", stBreak: "in pausa caffè",
     salary: "stipendio {n} a consegna", breakBtn: "Pausa caffè", fireBtn: "Saluta", solo: "Lavori da solo.", soloHint: "Al livello 2 potrai assumere qualcuno.",
     desks: "Scrivanie occupate: {a} / {b}", breakAll: "Pausa per tutti", cvs: "Curriculum arrivati", moreCv: "Altri curriculum", moreCvIn: "Altri curriculum ({n} s)",
@@ -450,7 +460,7 @@ const UI = {
     tabBoard: "Jobs", tabTeam: "Team", tabShop: "Shop", tabLog: "Journal",
     tiers: { s: "Small", m: "Medium", l: "Large", p: "Personal" },
     newClient: "new client", moodIs: "mood: {m}", picky: "demanding", noClient: "No client, no surprises", accept: "Accept",
-    clients: "Your clients", lostTag: "lost", jobsN: "{n} jobs together", lostN: "Clients lost: {n}", lost0: "No clients lost, so far", more: "Find more jobs", moreIn: "Find more jobs ({n}s)",
+    trophies: "Trophies", clients: "Your clients", lostTag: "lost", jobsN: "{n} jobs together", lostN: "Clients lost: {n}", lost0: "No clients lost, so far", more: "Find more jobs", moreIn: "Find more jobs ({n}s)",
     stWork: "working", stGo: "heading to desk", stArrive: "arriving", stBreak: "on a coffee break",
     salary: "{n} salary per delivery", breakBtn: "Coffee break", fireBtn: "Say goodbye", solo: "You work alone.", soloHint: "At level 2 you can hire someone.",
     desks: "Desks taken: {a} / {b}", breakAll: "Break for everyone", cvs: "Applications", moreCv: "More applications", moreCvIn: "More applications ({n}s)",
@@ -1328,13 +1338,12 @@ function renderBadges() {
   if (el.dataset.sig === sig) return;
   el.dataset.sig = sig;
   el.title = t("achTitle", { a: got.length, b: ACH.length });
-  el.innerHTML = got.length ? got.slice(0, 5).map(a => `<span class="coin" title="${esc(L(a.n))}">${a.i}</span>`).join("") + `<span class="more">${got.length}/${ACH.length}</span>`
-    : `<span class="coin off">🏆</span><span class="more">0/${ACH.length}</span>`;
+  el.innerHTML = `<span class="coin">🏆</span><span class="tlab"><b>${t("trophies")}</b><small>${got.length} / ${ACH.length}</small></span>` + got.slice(0, 3).map(a => `<span class="coin mini" title="${esc(L(a.n))}">${a.i}</span>`).join("");
 }
 $("badgeStrip").addEventListener("click", () => setTab("you"));
 function renderTut() {
   const el = $("tutCard");
-  if (S.jobsDone > 0) { el.hidden = true; return; }
+  if (S.jobsDone > 0 || S.stars > 0) { el.hidden = true; return; }
   el.hidden = false;
   const done = [!!S.job, S.satOnce, false];
   const nowIdx = done.indexOf(false);
@@ -1380,10 +1389,10 @@ function renderTabs() {
   const box = $("tabs");
   if (box.dataset.sig === sig) return;
   box.dataset.sig = sig;
-  box.innerHTML = defs.map(([id, ic, name, n]) => `<button type="button" role="tab" data-tab="${id}" aria-selected="${tab === id}">${ICONS[ic]}<span>${name}</span>${n ? `<span class="badge">${n}</span>` : ""}</button>`).join("");
+  box.innerHTML = defs.map(([id, ic, name, n]) => `<button type="button" role="tab" data-tab="${id}" aria-selected="${tab === id}" title="${name}" aria-label="${name}">${ICONS[ic]}<span class="lbl">${name}</span>${n ? `<span class="badge">${n}</span>` : ""}</button>`).join("");
 }
 $("tabs").addEventListener("click", e => { const b = e.target.closest("[data-tab]"); if (b) setTab(b.dataset.tab); });
-function setTab(x) { tab = x; renderTabs(); renderPanel(); }
+function setTab(x) { const changed = tab !== x; tab = x; renderTabs(); renderPanel(); if (changed) $("panel").scrollTop = 0; }
 
 function renderPanel() {
   const el = $("panel");
@@ -1796,7 +1805,7 @@ function drawOffice(dt) {
   drawRoom(night);
 
   const items = [];
-  office.objs.forEach(o => items.push({ y: o.y + o.h, draw: () => drawObj(o) }));
+  office.objs.forEach(o => items.push({ y: o.type === "rug" ? -10 : o.type === "cat" ? o.y : o.y + o.h, draw: () => drawObj(o) }));
   S.team.forEach(m => items.push({ y: m.y + 0.01, draw: () => drawMember(m) }));
   items.push({ y: P.y + 0.02, draw: () => drawPlayer() });
   items.sort((a, b) => a.y - b.y).forEach(i => i.draw());
