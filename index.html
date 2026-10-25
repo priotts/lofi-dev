@@ -94,8 +94,9 @@ a.iconbtn:hover { color: var(--ink); border-color: var(--warm); }
 .left { display: flex; flex-direction: column; gap: 12px; min-width: 0; min-height: 0; }
 .right { display: flex; flex-direction: column; gap: 12px; min-width: 0; min-height: 0; }
 .left .office { flex: 0 1 auto; min-height: 280px; aspect-ratio: var(--ar, 12 / 8); }
-.left .monitor { flex: 1 1 190px; min-height: 190px; }
-.left .monitor .editor { flex: 1 1 auto; height: auto; min-height: 120px; }
+.left .monitor { flex: 1 1 250px; min-height: 250px; }
+.left .monitor > :not(.editor) { flex: none; }
+.left .monitor .editor { flex: 1 1 auto; height: auto; min-height: 100px; }
 .right .tabcard { flex: 1 1 auto; min-height: 280px; display: flex; flex-direction: column; }
 .right .tabcard .tabs { flex: none; }
 .right > .card:not(.tabcard) { flex: none; }
@@ -103,6 +104,7 @@ a.iconbtn:hover { color: var(--ink); border-color: var(--warm); }
 @media (max-width: 900px) {
   .main { grid-template-columns: minmax(0, 1fr); height: auto; }
   .left .office { aspect-ratio: 5 / 4; flex: none; min-height: 0; }
+  .left .monitor { flex: none; min-height: 0; }
   .left .monitor .editor { height: 170px; flex: none; }
   .right .tabcard #panel { overflow: visible; }
 }
@@ -131,6 +133,7 @@ kbd { font-family: var(--f-code); font-size: .86em; background: var(--panel-2); 
 .caret { display: inline-block; width: .55em; height: 1.1em; vertical-align: -0.2em; background: var(--warm); animation: blink 1s steps(1) infinite; }
 @keyframes blink { 50% { opacity: 0; } }
 .standing { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 16px; font-family: var(--f-ui); background: color-mix(in srgb, #13111a 84%, transparent); }
+.standbtns { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
 .standing p { margin: 0 0 12px; color: var(--muted); max-width: 36ch; }
 .bug { position: absolute; width: 36px; height: 36px; border: 0; padding: 0; background: transparent; cursor: pointer; border-radius: 50%; animation: wiggle 1.4s ease-in-out infinite; z-index: 3; }
 .bug svg { width: 100%; height: 100%; display: block; }
@@ -330,7 +333,7 @@ textarea.code { width: 100%; min-height: 80px; resize: vertical; background: var
         <div class="editor" id="editor" tabindex="0">
           <div id="code"></div>
           <div class="standing" id="standing">
-            <div><p id="standTxt"></p><button type="button" class="primary" id="goDesk"></button></div>
+            <div><p id="standTxt"></p><div class="standbtns"><button type="button" class="primary" id="goDesk"></button><button type="button" id="goAuto"></button></div></div>
           </div>
         </div>
         <div class="statusbar"><span id="sbLoc"></span><span id="sbPower"></span><span id="sbTeam"></span></div>
@@ -2623,6 +2626,7 @@ $("typeBtn").addEventListener("click", () => typeChars(perKey(), true));
 $("standBtn").addEventListener("click", standUp);
 $("autoBtn").addEventListener("click", () => { S.auto = !S.auto; toast(t(S.auto ? "autoOn" : "autoOff")); renderAuto(); save(); });
 $("goDesk").addEventListener("click", () => { ensureCtx(); music.ctx && music.ctx.resume(); walkTo(deskOf(0)); });
+$("goAuto").addEventListener("click", () => { ensureCtx(); music.ctx && music.ctx.resume(); S.auto = true; renderAuto(); save(); walkTo(deskOf(0)); });
 $("musicBtn").addEventListener("click", () => setMusic(!music.on));
 $("rainBtn").addEventListener("click", () => {
   if (!rainAudio) { rainAudio = true; S.rain = true; ensureCtx(); music.ctx && music.ctx.resume(); }
@@ -2647,7 +2651,7 @@ function setLang(l, remember) {
   document.querySelectorAll("[data-lang]").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === l));
   document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = t(el.dataset.i18n));
   $("keysHint").innerHTML = t("keys");
-  $("standTxt").textContent = t("stand"); $("goDesk").textContent = t("goDesk");
+  $("standTxt").textContent = t("stand"); $("goDesk").textContent = t("goDesk"); $("goAuto").textContent = "▶ " + t("auto");
   $("typeBtn").textContent = t("tap"); $("standBtn").innerHTML = `${t("standUp")} <kbd>Esc</kbd>`;
   $("footTxt").textContent = t("foot"); $("resetBtn").textContent = endgame ? t("endReset") : t("reset");
   $("endBtn").textContent = endgame ? t("endOff") : t("endOn");
