@@ -285,6 +285,12 @@ textarea.code { width: 100%; min-height: 80px; resize: vertical; background: var
 
 .dialog { position: fixed; inset: 0; z-index: 40; background: rgba(10,8,18,.7); display: grid; place-items: center; padding: 16px; }
 .dialog .card { width: min(480px, 100%); }
+.cl-wrap { max-height: min(60vh, 420px); overflow: auto; margin: 4px -8px 12px 0; padding-right: 8px; }
+.cl-v { margin: 12px 0 4px; font-size: .95rem; color: var(--warm); display: flex; align-items: center; gap: 8px; }
+.cl-v:first-child { margin-top: 0; }
+.cl-new { font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; padding: 1px 7px; border-radius: 999px; background: var(--warm); color: var(--warm-ink); }
+.chlog { margin: 0; padding-left: 1.2em; color: var(--ink); font-size: .9rem; line-height: 1.5; }
+.chlog li + li { margin-top: 2px; }
 
 @media (max-width: 640px) {
   .topbar { padding: 10px; }
@@ -406,7 +412,7 @@ const UI = {
     keys: "<kbd>WASD</kbd> o <kbd>frecce</kbd> per camminare · <kbd>E</kbd> per interagire · oppure tocca",
     stand: "Sei in piedi. Siediti alla tua scrivania per programmare: lì ogni tasto che premi scrive codice.",
     goDesk: "Vai alla scrivania", tap: "Tocca per scrivere", auto: "Auto-code", autoOn: "Auto-code acceso: il codice si scrive da solo", autoOff: "Auto-code spento", autoHint: "Scrive da solo, come {n} tasti al secondo. Premere i tasti va ancora più veloce.", standUp: "Alzati", lines: "righe", perKey: "caratteri per tasto", teamCps: "team: {n} car/s", cps: "car/s",
-    coffeeOn: "caffè · {n} s", foot: "Il gioco si salva da solo in questo browser.", reset: "Ricomincia da capo", star: "⭐ Lascia una stella", bug: "🐞 Segnala un bug", bugTitle: "Bug: ", bugBody: "**Cosa è successo?**\n\n\n**Cosa ti aspettavi?**\n\n", resetSure: "Sicuro? Premi di nuovo", sure: "Sicuro?",
+    coffeeOn: "caffè · {n} s", foot: "Il gioco si salva da solo in questo browser.", reset: "Ricomincia da capo", newsTitle: "📰 Novità", newsNew: "nuovo", star: "⭐ Lascia una stella", bug: "🐞 Segnala un bug", bugTitle: "Bug: ", bugBody: "**Cosa è successo?**\n\n\n**Cosa ti aspettavi?**\n\n", resetSure: "Sicuro? Premi di nuovo", sure: "Sicuro?",
     editorLabel: "Editor: quando sei seduto, premi qualsiasi tasto per scrivere", officeLabel: "Il tuo ufficio visto dall'alto",
     tutTitle: "Primi passi", tut1: "Scegli un lavoro dalla bacheca qui sotto", tut2: "Vai alla scrivania e siediti (tasto E o tocco)", tut3: "Premi tasti a caso finché il lavoro è consegnato",
     job: "Lavoro in corso", noJob: "Nessun lavoro in corso. Scegline uno dalla bacheca qui sotto.", ownProject: "Progetto tuo", personal: "Progetto personale",
@@ -452,7 +458,7 @@ const UI = {
     ev: { blackout: "Blackout! Si spegne tutto. Accendi una candela e aspetti.", light: "Torna la luce. Il router lampeggia felice.", catKeys: "Un gatto ti cammina sulla tastiera. Ha scritto {n} righe, e compilano.", catKeysNo: "Il gatto del vicino entra dalla finestra e ti cammina sulla tastiera. Ha scritto {n} righe.", pizza: "{n} vi manda una pizza. Il team torna pieno di energie.", pizzaNo: "La vicina ti porta una fetta di torta. Energia piena.", rainbow: "Smette di piovere per un attimo e spunta un arcobaleno. Ispirazione: +50% per 40 secondi.", review: "Un vecchio cliente ti lascia una recensione a cinque stelle. +2 reputazione.", tip: "Trovi una mancia dimenticata in un vecchio progetto: +{p}." },
     blackType: "È buio. Aspetta che torni la luce.", blackBanner: "⚡ Blackout · la luce torna tra {n} s",
     E: "E · ",
-    labels: { desk: "Siediti e programma", coffee: "Bevi un caffè", board: "Guarda la bacheca dei lavori", shelf: "Leggi un libro di programmazione", bed: "Fai un pisolino", sofa: "Riposati sul divano", vinyl: "Cambia disco", cat: "Accarezza il gatto", plant: "Annaffia la pianta", guitar: "Strimpella la chitarra", whiteboard: "Fai un brainstorming", booth: "Chiama il cliente", beanbag: "Sprofonda nel pouf", bread: "Prendi un cornetto", meeting: "Riunione di team", piano: "Suona il piano", pingpong: "Gioca a ping pong", arcade: "Gioca al cabinato", trophies: "Guarda i trofei" },
+    labels: { desk: "Siediti e programma", coffee: "Bevi un caffè", board: "Guarda la bacheca dei lavori", shelf: "Leggi un libro di programmazione", bed: "Fai un pisolino", sofa: "Riposati sul divano", vinyl: "Cambia disco", cat: "Accarezza il gatto", plant: "Annaffia la pianta", guitar: "Strimpella la chitarra", whiteboard: "Fai un brainstorming", booth: "Chiama il cliente", beanbag: "Sprofonda nel pouf", bread: "Prendi un cornetto", meeting: "Riunione di team", piano: "Suona il piano", pingpong: "Gioca a ping pong", arcade: "Gioca al cabinato", trophies: "Guarda i trofei", news: "Leggi le novità" },
     ix: { guitar: "Strimpelli tre accordi. Il gatto immaginario approva.", whiteboard: "Disegni un diagramma pieno di frecce. Ora è tutto chiaro. +XP", boothOk: "Chiami {n}: due chiacchiere e torna il sorriso.", boothNo: "La cabina è libera, ma non hai nessuno da chiamare.", bread: "Un cornetto caldo dal forno di sotto. +50% per 40 secondi.", meeting: "Riunione di cinque minuti, davvero. Il team è più carico.", meetingNo: "Una riunione da solo è solo un caffè.", piano: "Suoni una melodia lo-fi al piano.", pingpong: "Partita a ping pong, vinci 11 a 9. Tutti più svegli.", arcade: "Una partita al cabinato. Nuovo record! +XP", trophies: "La parete dei trofei: {a} su {b}.", wait: "Già fatto da poco. Riprova tra un po'." },
   },
   en: {
@@ -461,7 +467,7 @@ const UI = {
     keys: "<kbd>WASD</kbd> or <kbd>arrows</kbd> to walk · <kbd>E</kbd> to interact · or tap",
     stand: "You're standing. Sit at your desk to code: once you're there, every key you press writes code.",
     goDesk: "Go to your desk", tap: "Tap to type", auto: "Auto-code", autoOn: "Auto-code on: the code writes itself", autoOff: "Auto-code off", autoHint: "Types on its own, like {n} keys per second. Pressing keys is still faster.", standUp: "Stand up", lines: "lines", perKey: "chars per key", teamCps: "team: {n} chars/s", cps: "chars/s",
-    coffeeOn: "coffee · {n}s", foot: "The game saves itself in this browser.", reset: "Start over", star: "⭐ Star on GitHub", bug: "🐞 Report a bug", bugTitle: "Bug: ", bugBody: "**What happened?**\n\n\n**What did you expect?**\n\n", resetSure: "Sure? Press again", sure: "Sure?",
+    coffeeOn: "coffee · {n}s", foot: "The game saves itself in this browser.", reset: "Start over", newsTitle: "📰 What's new", newsNew: "new", star: "⭐ Star on GitHub", bug: "🐞 Report a bug", bugTitle: "Bug: ", bugBody: "**What happened?**\n\n\n**What did you expect?**\n\n", resetSure: "Sure? Press again", sure: "Sure?",
     editorLabel: "Editor: while seated, press any key to type", officeLabel: "Your office, seen from above",
     tutTitle: "Getting started", tut1: "Pick a job from the board below", tut2: "Walk to your desk and sit down (E key or tap)", tut3: "Mash keys until the job ships",
     job: "Current job", noJob: "No job right now. Pick one from the board below.", ownProject: "Your own project", personal: "Personal project",
@@ -507,7 +513,7 @@ const UI = {
     ev: { blackout: "Blackout! Everything goes dark. You light a candle and wait.", light: "The lights are back. The router blinks happily.", catKeys: "A cat walks across your keyboard. It wrote {n} lines, and they compile.", catKeysNo: "The neighbor's cat climbs in the window and walks on your keyboard. It wrote {n} lines.", pizza: "{n} sends the team a pizza. Everyone's energy is full.", pizzaNo: "Your neighbor brings you a slice of cake. Energy full.", rainbow: "The rain stops for a moment and a rainbow appears. Inspiration: +50% for 40 seconds.", review: "An old client leaves you a five-star review. +2 reputation.", tip: "You find a forgotten tip in an old project: +{p}." },
     blackType: "It's dark. Wait for the lights to come back.", blackBanner: "⚡ Blackout · lights back in {n}s",
     E: "E · ",
-    labels: { desk: "Sit down and code", coffee: "Have a coffee", board: "Check the job board", shelf: "Read a programming book", bed: "Take a nap", sofa: "Rest on the couch", vinyl: "Change the record", cat: "Pet the cat", plant: "Water the plant", guitar: "Strum the guitar", whiteboard: "Brainstorm", booth: "Call the client", beanbag: "Sink into the beanbag", bread: "Grab a croissant", meeting: "Team meeting", piano: "Play the piano", pingpong: "Play ping pong", arcade: "Play the arcade", trophies: "Look at the trophies" },
+    labels: { desk: "Sit down and code", coffee: "Have a coffee", board: "Check the job board", shelf: "Read a programming book", bed: "Take a nap", sofa: "Rest on the couch", vinyl: "Change the record", cat: "Pet the cat", plant: "Water the plant", guitar: "Strum the guitar", whiteboard: "Brainstorm", booth: "Call the client", beanbag: "Sink into the beanbag", bread: "Grab a croissant", meeting: "Team meeting", piano: "Play the piano", pingpong: "Play ping pong", arcade: "Play the arcade", trophies: "Look at the trophies", news: "Read what's new" },
     ix: { guitar: "You strum three chords. An imaginary cat approves.", whiteboard: "You draw a diagram full of arrows. It all makes sense now. +XP", boothOk: "You call {n}: a little chat and they're smiling again.", boothNo: "The booth is free, but there's nobody to call.", bread: "A warm croissant from the bakery downstairs. +50% for 40 seconds.", meeting: "A five-minute meeting, for real. The team is fired up.", meetingNo: "A meeting alone is just a coffee.", piano: "You play a lo-fi tune on the piano.", pingpong: "Ping pong match, you win 11 to 9. Everyone's awake now.", arcade: "One round at the arcade. New high score! +XP", trophies: "Trophy wall: {a} of {b}.", wait: "Done that recently. Try again in a bit." },
   },
 };
@@ -833,6 +839,18 @@ const ACH = [
 
 // stazioni della radio: ogni traccia è generata dal vivo con accordi, ritmo e timbri diversi
 const GAME_VERSION = "1.3";
+const CHANGELOG = [
+  { v: "1.3", it: ["Auto-code più veloce: ora scrive come 4 tasti al secondo.", "Nuovo PC delle novità in ufficio: è quello che stai leggendo.", "Pulsante \"Segnala un bug\" e stella su GitHub in fondo alla pagina e nella radio."], en: ["Faster Auto-code: it now types like 4 keys per second.", "New \"What's new\" PC in the office: you're reading it.", "\"Report a bug\" and \"Star on GitHub\" buttons at the bottom of the page and on the radio."] },
+  { v: "1.2", it: ["Pulsante Auto-code alla scrivania, con il timer del lavoro.", "Nuovo upgrade nel negozio: Script di auto-code.", "La barra della scrivania ora si vede su tutti gli schermi, anche da telefono."], en: ["Auto-code button at the desk, with a job timer.", "New shop upgrade: Auto-code script.", "The desk bar is now visible on every screen, phones included."] },
+  { v: "1.1", it: ["Radio lo-fi come schermata iniziale, con 8 stazioni e una scena per ognuna.", "Ogni ufficio ha il suo stile, più trofei, eventi tranquilli e prestigio."], en: ["Lo-fi radio as the start screen, with 8 stations and a scene for each.", "Every office has its own look, plus trophies, chill events and prestige."] },
+  { v: "1.0", it: ["Prima versione: scrivi codice, consegna lavori, assumi un team."], en: ["First release: write code, ship jobs, hire a team."] },
+];
+const newsUnread = () => S.seenVer !== GAME_VERSION;
+function openNews() {
+  const html = CHANGELOG.map((c, i) => `<h3 class="cl-v">v${c.v}${i === 0 && newsUnread() ? ` <span class="cl-new">${t("newsNew")}</span>` : ""}</h3><ul class="chlog">${c[lang].map(x => `<li>${esc(x)}</li>`).join("")}</ul>`).join("");
+  openDialog(`<h2>${t("newsTitle")}</h2><div class="cl-wrap">${html}</div><div class="btnrow"><button type="button" class="small" data-d="close">${t("close")}</button></div>`);
+  S.seenVer = GAME_VERSION; save();
+}
 let stars = null;
 function renderStars() { ["starLink", "starLink2"].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = t("star") + (stars != null ? `<b>${stars}</b>` : ""); }); }
 const STATIONS = [
@@ -878,7 +896,7 @@ function freshState() {
     job: null, offers: [], clients: {}, team: [], candidates: [],
     clock: 22 * 60, rain: true, log: [], boost: 0, boostCd: 0, boardCd: 0, cvCd: 0, lastSeen: Date.now(), uid: 1,
     stars: 0, ach: {}, stats: { bugs: 0, coffees: 0, pets: 0, events: 0, time: 0, heard: [] },
-    look: { shirt: "#f4b86a", hair: "#3b2a26", hs: 0, skin: "#f6d3b3", glasses: false }, decor: { floor: 0, rug: 0 }, blackout: 0, evT: 150, auto: false,
+    look: { shirt: "#f4b86a", hair: "#3b2a26", hs: 0, skin: "#f6d3b3", glasses: false }, decor: { floor: 0, rug: 0 }, blackout: 0, evT: 150, auto: false, seenVer: "",
   };
 }
 function endgameState() {
@@ -1118,6 +1136,7 @@ function buildOffice() {
     objs.push(O("guitar", 0.4, 5.4, 0.6, 1.1, { spot: { x: 1.4, y: 6.1 }, label: "guitar" }));
     objs.push(O("floorlamp", 8.0, 2.4, 0.5, 0.5));
     objs.push(O("basket", 4.6, 6.7, 0.7, 0.6));
+    objs.push(O("news", 0.4, 3.2, 0.9, 0.7, { spot: { x: 0.85, y: 4.5 }, label: "news" }));
     objs.push(O("rug", 3.6, 4.4, 4.4, 2.4, { solid: false, round: true }));
   } else if (S.office === 1) {
     desks.push([2, 3, "up"], [2, 2, "down"], [6, 3, "up"], [6, 2, "down"]);
@@ -1131,6 +1150,7 @@ function buildOffice() {
     objs.push(O("beanbag", 0.8, 7.4, 1.1, 0.9, { spot: { x: 2.4, y: 7.6 }, label: "beanbag", col: "#e07a5f" }));
     objs.push(O("beanbag", 1.6, 8.5, 1.1, 0.9, { col: "#5c7aa8" }));
     objs.push(O("bigplant", 10.4, 3.6, 0.9, 0.9));
+    objs.push(O("news", 14.4, 6.3, 0.9, 0.7, { spot: { x: 14.85, y: 7.6 }, label: "news" }));
     objs.push(O("bigplant", 0.4, 4.6, 0.9, 0.9));
     objs.push(O("rug", 5.6, 5.4, 4.8, 2.6, { solid: false }));
   } else if (S.office === 2) {
@@ -1145,6 +1165,7 @@ function buildOffice() {
     objs.push(O("piano", 0.3, 7.2, 1.8, 1.2, { spot: { x: 2.7, y: 7.8 }, label: "piano" }));
     objs.push(O("sofa", 15.8, 9.5, 3, 1, { spot: { x: 17.3, y: 8.9 }, label: "sofa" }));
     objs.push(O("bigplant", 13.5, 4.0, 0.9, 0.9));
+    objs.push(O("news", 0.4, 4.6, 0.9, 0.7, { spot: { x: 0.85, y: 5.9 }, label: "news" }));
     objs.push(O("bigplant", 19.0, 6.0, 0.9, 0.9));
     objs.push(O("floorlamp", 14.9, 9.6, 0.5, 0.5));
     objs.push(O("rug", 7.2, 6.4, 5.6, 3.0, { solid: false }));
@@ -1158,6 +1179,7 @@ function buildOffice() {
     objs.push(O("coffee", 19.6, 6.6, 3.2, 1.2, { spot: { x: 21.2, y: 8.4 }, label: "coffee", bar: true }));
     objs.push(O("pingpong", 8.6, 7.6, 3.2, 1.7, { spot: { x: 10.2, y: 9.8 }, label: "pingpong" }));
     objs.push(O("arcade", 0.4, 10.4, 1.1, 1.3, { spot: { x: 1.0, y: 12.3 }, label: "arcade" }));
+    objs.push(O("news", 0.4, 8.2, 0.9, 0.7, { spot: { x: 1.8, y: 8.55 }, label: "news" }));
     objs.push(O("sofa", 19.8, 12.5, 3, 1, { spot: { x: 21.3, y: 11.9 }, label: "sofa" }));
     objs.push(O("beanbag", 4.0, 11.6, 1.1, 0.9, { spot: { x: 5.0, y: 10.9 }, label: "beanbag", col: "#e07a5f" }));
     objs.push(O("beanbag", 5.6, 12.3, 1.1, 0.9, { col: "#9fcaa4" }));
@@ -1253,6 +1275,7 @@ function interact(o) {
     case "vinyl": if (!music.on) setMusic(true); else toast(t("sideB")); break;
     case "cat": lastPet = now(); S.stats.pets++; P.cheer = 0.8; purr(); toast(pick(t("cats"))); break;
     case "plant": toast(t("water")); break;
+    case "news": P.dir = "up"; openNews(); break;
     default: {
       const ix = t("ix"), cd = { whiteboard: 90, booth: 60, bread: 40, meeting: 90, pingpong: 60, arcade: 60, beanbag: 20 }[o.type] || 0;
       if (cd && now() - (lastUse[o.type] || -999) < cd) { toast(ix.wait); break; }
@@ -2015,6 +2038,17 @@ function drawObj(o) {
       ctx.fillStyle = "#dfe3ea"; ctx.fillRect(x + w / 2 - 2, y - 0.1 * T, 4, h + 0.2 * T);
       const bx = x + w / 2 + Math.sin(tA * 3) * w * 0.35, by = y + h / 2 + Math.cos(tA * 5) * h * 0.25 - Math.abs(Math.sin(tA * 6)) * 6;
       circle(bx, by, 3, "#fff"); circle(x + 0.3 * T, y + h * 0.3, 0.12 * T, "#c0392b"); circle(x + w - 0.35 * T, y + h * 0.7, 0.12 * T, "#2c3e80"); break;
+    }
+    case "news": {
+      rr(x - 0.05 * T, y + 0.1 * T, w + 0.1 * T, h - 0.1 * T, 4, "#5a4636"); rr(x, y + h - 0.1 * T, w, 0.1 * T, 2, "#3e3026");
+      rr(x + 0.1 * T, y - 0.5 * T, w - 0.2 * T, 0.62 * T, 5, "#d9cfbf"); rr(x + 0.17 * T, y - 0.43 * T, w - 0.34 * T, 0.42 * T, 3, "#14231a");
+      ctx.fillStyle = "#7fd89a"; for (let k = 0; k < 3; k++) ctx.fillRect(x + 0.24 * T, y - 0.36 * T + k * 0.11 * T, (0.25 + ((k * 37 + Math.floor(tA * 2)) % 3) * 0.08) * T, 0.05 * T);
+      rr(x + 0.15 * T, y + 0.18 * T, w - 0.3 * T, 0.14 * T, 2, "#efe8dc");
+      if (newsUnread()) {
+        const bob = Math.sin(tA * 4) * 3, cx = x + w / 2, cy = y - 0.78 * T + bob;
+        circle(cx, cy, 0.2 * T, "#f4b86a"); ctx.fillStyle = "#2a1f3d"; ctx.font = `800 ${Math.round(T * 0.28)}px ${CANVAS_FONT}`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("!", cx, cy + 1); ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+      }
+      break;
     }
     case "arcade": {
       rr(x, y - 0.8 * T, w, h + 0.8 * T, 5, "#5b3d8a"); rr(x + 0.12 * T, y - 0.65 * T, w - 0.24 * T, 0.55 * T, 3, "#13111a");
