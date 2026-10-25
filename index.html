@@ -260,9 +260,13 @@ textarea.code { width: 100%; min-height: 80px; resize: vertical; background: var
 /* modalità radio */
 .radio { --st: #f4b86a; position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; overflow: auto; padding: 24px max(16px, env(safe-area-inset-left, 0px)); background: radial-gradient(900px 600px at 50% 0%, color-mix(in srgb, var(--st) 22%, #1d1830), #120f1b 70%); transition: background .6s; }
 .radio-in { width: min(640px, 100%); display: grid; gap: 16px; text-align: center; }
-.radio-head { display: flex; align-items: center; justify-content: center; gap: 10px; font-family: var(--f-display); font-size: 1.2rem; font-weight: 800; }
+.radio-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 10px; font-family: var(--f-display); font-size: 1.2rem; font-weight: 800; }
 .radio-head .logo { width: 30px; height: 30px; border-radius: 9px; }
 .radio-head b span { color: var(--warm); }
+#radioBtn { border-color: color-mix(in srgb, var(--warm) 75%, var(--line)); color: var(--ink); animation: radioGlow 2.6s ease-in-out infinite; }
+@keyframes radioGlow { 0%, 100% { box-shadow: 0 0 0 1px color-mix(in srgb, var(--warm) 35%, transparent), 0 0 6px color-mix(in srgb, var(--warm) 25%, transparent); } 50% { box-shadow: 0 0 0 1px color-mix(in srgb, var(--warm) 70%, transparent), 0 0 16px color-mix(in srgb, var(--warm) 55%, transparent); } }
+@media (prefers-reduced-motion: reduce) { #radioBtn { animation: none; box-shadow: 0 0 10px color-mix(in srgb, var(--warm) 45%, transparent); } }
+.radio-head .rlang { font-family: var(--f-ui); font-size: .8rem; font-weight: 600; }
 .radio-head .tag { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); border: 1px solid var(--line); border-radius: 99px; padding: 2px 9px; }
 .radio .hint { margin: -6px 0 0; color: var(--faint); font-size: .8rem; }
 .radio .hint.gh { margin-top: -10px; display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap; } .radio .hint.gh .madeby { font-size: .86rem; }
@@ -369,7 +373,7 @@ textarea.code { width: 100%; min-height: 80px; resize: vertical; background: var
 
 <div class="radio" id="radio" hidden role="dialog" aria-modal="true" aria-labelledby="stName">
   <div class="radio-in">
-    <div class="radio-head"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#241a10" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m8 8-4 4 4 4M16 8l4 4-4 4"/></svg></span><b>Lo-fi <span>Dev</span></b><span class="tag" id="radioTag"></span></div>
+    <div class="radio-head"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#241a10" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m8 8-4 4 4 4M16 8l4 4-4 4"/></svg></span><b>Lo-fi <span>Dev</span></b><span class="tag" id="radioTag"></span><div class="seg rlang" role="group" aria-label="Language"><button type="button" data-lang="it" aria-pressed="false">IT</button><button type="button" data-lang="en" aria-pressed="false">EN</button></div></div>
     <div class="radio-win"><canvas id="radioCv"></canvas></div>
     <h2 id="stName"></h2>
     <div class="sub" id="stSub"></div>
