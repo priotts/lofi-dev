@@ -14,7 +14,7 @@ A very chill developer simulator, with lo-fi music generated live in your browse
 The page opens on the radio: eight stations, each with its own groove and illustrated scene (rainy city, morning coffee, beach at sunset, deep space, 8-bit sunset, forest cabin, winter snow, midnight train). Adjust music and rain, and leave it on while you work. **Enter the game** takes you to the office.
 
 ### The game
-- Walk around your office, sit at your desk, and every key you press writes code.
+- Walk around your office, sit at your desk, and every key you press writes code. Prefer not to mash keys? Turn on **Auto-code** and watch the timer.
 - Take jobs from the board and chat with clients: your answers matter, and you can lose a client.
 - Level up, buy gadgets, hire a team (each role has its own badge) and move to bigger offices.
 - Four offices, each with its own style and furniture: bedroom, coworking corner, office above the bakery, riverside studio with ping pong and an arcade cabinet.
@@ -34,7 +34,7 @@ Un simulatore di sviluppatore molto rilassato, con musica lo-fi generata dal viv
 La pagina si apre sulla radio: otto stazioni, ognuna con il suo ritmo e la sua scena illustrata (città sotto la pioggia, caffè del mattino, spiaggia al tramonto, spazio, tramonto a 8 bit, baita nel bosco, neve, treno di mezzanotte). Si regolano musica e pioggia, e si può lasciare accesa mentre si lavora. Con **Entra nel gioco** si passa all'ufficio.
 
 ### Il gioco
-- Cammini per l'ufficio, ti siedi alla scrivania e ogni tasto scrive codice.
+- Cammini per l'ufficio, ti siedi alla scrivania e ogni tasto scrive codice. Non hai voglia di pestare i tasti? Accendi l'**Auto-code** e guarda il timer.
 - Accetti lavori dalla bacheca e parli con i clienti: le risposte contano e un cliente si può perdere.
 - Sali di livello, compri gadget, assumi un team (ogni ruolo ha il suo badge) e traslochi.
 - Quattro uffici, ognuno con stile e arredi propri: cameretta, coworking, ufficio sopra la panetteria, studio sul fiume con ping pong e cabinato.

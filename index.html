@@ -138,6 +138,9 @@ kbd { font-family: var(--f-code); font-size: .86em; background: var(--panel-2); 
 .statusbar { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; padding: 6px 12px; background: var(--panel); border-top: 1px solid var(--line); font-family: var(--f-code); font-size: .72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 .seatbar { display: flex; gap: 8px; padding: 8px; background: var(--panel); }
 .seatbar .typebtn { flex: 1; padding: 12px; font-weight: 600; font-size: 1rem; }
+.seatbar .autobtn { flex: 1; padding: 12px; font-weight: 600; font-size: 1rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
+@media (max-width: 600px) { .seatbar .typebtn, .seatbar .autobtn { font-size: .9rem; padding: 10px 8px; white-space: normal; } }
+.seatbar .autobtn[aria-pressed="true"] { background: #2f4a3c; border-color: #9fcaa4; color: #d8f0dc; }
 
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; min-width: 0; }
 .card h2 { margin: 0 0 10px; font-family: var(--f-display); font-size: 1.02rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
@@ -333,6 +336,7 @@ textarea.code { width: 100%; min-height: 80px; resize: vertical; background: var
         <div class="statusbar"><span id="sbLoc"></span><span id="sbPower"></span><span id="sbTeam"></span></div>
         <div class="seatbar" id="seatbar" hidden>
           <button class="typebtn primary" id="typeBtn" type="button"></button>
+          <button class="autobtn" id="autoBtn" type="button" aria-pressed="false"></button>
           <button id="standBtn" type="button"></button>
         </div>
       </section>
@@ -394,7 +398,7 @@ const UI = {
     night: "notte", dawn: "alba", day: "giorno", sunset: "tramonto", raining: "piove piano",
     keys: "<kbd>WASD</kbd> o <kbd>frecce</kbd> per camminare · <kbd>E</kbd> per interagire · oppure tocca",
     stand: "Sei in piedi. Siediti alla tua scrivania per programmare: lì ogni tasto che premi scrive codice.",
-    goDesk: "Vai alla scrivania", tap: "Tocca per scrivere", standUp: "Alzati", lines: "righe", perKey: "caratteri per tasto", teamCps: "team: {n} car/s", cps: "car/s",
+    goDesk: "Vai alla scrivania", tap: "Tocca per scrivere", auto: "Auto-code", autoOn: "Auto-code acceso: il codice si scrive da solo", autoOff: "Auto-code spento", autoHint: "Scrive da solo, come {n} tasti al secondo. Premere i tasti va ancora più veloce.", standUp: "Alzati", lines: "righe", perKey: "caratteri per tasto", teamCps: "team: {n} car/s", cps: "car/s",
     coffeeOn: "caffè · {n} s", foot: "Il gioco si salva da solo in questo browser.", reset: "Ricomincia da capo", resetSure: "Sicuro? Premi di nuovo", sure: "Sicuro?",
     editorLabel: "Editor: quando sei seduto, premi qualsiasi tasto per scrivere", officeLabel: "Il tuo ufficio visto dall'alto",
     tutTitle: "Primi passi", tut1: "Scegli un lavoro dalla bacheca qui sotto", tut2: "Vai alla scrivania e siediti (tasto E o tocco)", tut3: "Premi tasti a caso finché il lavoro è consegnato",
@@ -449,7 +453,7 @@ const UI = {
     night: "night", dawn: "dawn", day: "day", sunset: "sunset", raining: "light rain",
     keys: "<kbd>WASD</kbd> or <kbd>arrows</kbd> to walk · <kbd>E</kbd> to interact · or tap",
     stand: "You're standing. Sit at your desk to code: once you're there, every key you press writes code.",
-    goDesk: "Go to your desk", tap: "Tap to type", standUp: "Stand up", lines: "lines", perKey: "chars per key", teamCps: "team: {n} chars/s", cps: "chars/s",
+    goDesk: "Go to your desk", tap: "Tap to type", auto: "Auto-code", autoOn: "Auto-code on: the code writes itself", autoOff: "Auto-code off", autoHint: "Types on its own, like {n} keys per second. Pressing keys is still faster.", standUp: "Stand up", lines: "lines", perKey: "chars per key", teamCps: "team: {n} chars/s", cps: "chars/s",
     coffeeOn: "coffee · {n}s", foot: "The game saves itself in this browser.", reset: "Start over", resetSure: "Sure? Press again", sure: "Sure?",
     editorLabel: "Editor: while seated, press any key to type", officeLabel: "Your office, seen from above",
     tutTitle: "Getting started", tut1: "Pick a job from the board below", tut2: "Walk to your desk and sit down (E key or tap)", tut3: "Mash keys until the job ships",
@@ -762,6 +766,7 @@ const ICONS = {
   chair: '<svg viewBox="0 0 24 24" fill="none" stroke="#92b7dd" stroke-width="1.8" stroke-linecap="round"><path d="M7 3h10v9H7zM5 12h14M12 12v5M7 21l5-4 5 4"/></svg>',
   vinyl: '<svg viewBox="0 0 24 24" fill="none" stroke="#ec9a90" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5"/></svg>',
   cat: '<svg viewBox="0 0 24 24" fill="none" stroke="#efe8dc" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20c-1-5 0-9 2-11L6 4l4 3h4l4-3-1 5c2 2 3 6 2 11H5Z"/></svg>',
+  auto: '<svg viewBox="0 0 24 24" fill="none" stroke="#9fcaa4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l5.5-3.5z"/></svg>',
   macro: '<svg viewBox="0 0 24 24" fill="none" stroke="#b9a0da" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><path d="M15 17h4M17 15v4"/></svg>',
   house: '<svg viewBox="0 0 24 24" fill="none" stroke="#9fcaa4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 12 4l9 7M5 10v10h14V10M10 20v-6h4v6"/></svg>',
   tBoard: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h6M7 13h10M7 17h4"/></svg>',
@@ -773,6 +778,7 @@ const ICONS = {
 
 const GADGETS = [
   { id: "keyboard", name: { it: "Tastiera meccanica", en: "Mechanical keyboard" }, icon: "key", base: 15, grow: 1.32, lvl: 1, max: 10, desc: { it: "+2 caratteri a ogni tasto. Il clic-clac aiuta.", en: "+2 chars per key. The clickety-clack helps." } },
+  { id: "autocode", name: { it: "Script di auto-code", en: "Auto-code script" }, icon: "auto", base: 40, grow: 1.8, lvl: 1, max: 4, desc: { it: "L'auto-code scrive il 50% più veloce.", en: "Auto-code types 50% faster." } },
   { id: "phones", name: { it: "Cuffie antirumore", en: "Noise-cancelling headphones" }, icon: "phones", base: 60, grow: 1, lvl: 1, max: 1, desc: { it: "+25% di caratteri a ogni tasto. Le porti in testa.", en: "+25% chars per key. You wear them around the office." } },
   { id: "plant", name: { it: "Pothos", en: "Pothos" }, icon: "plant", base: 90, grow: 1.55, lvl: 2, max: 6, desc: { it: "+6% sulla paga di ogni lavoro. Compare nell'ufficio.", en: "+6% pay on every job. Shows up in the office." } },
   { id: "duck", name: { it: "Paperella di gomma", en: "Rubber duck" }, icon: "duck", base: 160, grow: 1, lvl: 2, max: 1, desc: { it: "Più bug da schiacciare, e valgono il doppio.", en: "More bugs to squash, and they're worth double." } },
@@ -862,7 +868,7 @@ function freshState() {
     job: null, offers: [], clients: {}, team: [], candidates: [],
     clock: 22 * 60, rain: true, log: [], boost: 0, boostCd: 0, boardCd: 0, cvCd: 0, lastSeen: Date.now(), uid: 1,
     stars: 0, ach: {}, stats: { bugs: 0, coffees: 0, pets: 0, events: 0, time: 0, heard: [] },
-    look: { shirt: "#f4b86a", hair: "#3b2a26", hs: 0, skin: "#f6d3b3", glasses: false }, decor: { floor: 0, rug: 0 }, blackout: 0, evT: 150,
+    look: { shirt: "#f4b86a", hair: "#3b2a26", hs: 0, skin: "#f6d3b3", glasses: false }, decor: { floor: 0, rug: 0 }, blackout: 0, evT: 150, auto: false,
   };
 }
 function endgameState() {
@@ -902,6 +908,8 @@ function perKey() {
   if (S.boost > 0) k *= 1.5;
   return Math.max(1, Math.round(k));
 }
+function autoKps() { return 2 * (1 + 0.5 * owned("autocode")); }
+function autoCps() { return S.auto && P.seated && S.blackout <= 0 ? autoKps() * perKey() : 0; }
 function memberCps(m) { if (m.state !== "work" || !m.seated || S.blackout > 0) return 0; return ROLES[m.role].cps * (0.3 + 0.7 * m.energy / 100) * charsMult(); }
 function teamCps() { return S.team.reduce((a, m) => a + memberCps(m), 0); }
 function hasRole(r) { return S.team.some(m => m.role === r && m.state === "work"); }
@@ -1325,6 +1333,7 @@ function renderHud() {
   $("sbLoc").textContent = `${fmt(S.loc)} ${t("lines")}`;
   $("sbPower").textContent = `${perKey()} ${t("perKey")}`;
   $("sbTeam").textContent = t("teamCps", { n: fmt(teamCps()) });
+  renderAuto();
   $("boost").textContent = S.boost > 0 ? t("coffeeOn", { n: Math.ceil(S.boost) }) : "";
   const h = Math.floor(S.clock / 60) % 24, m = Math.floor(S.clock % 60);
   const moment = t(h >= 21 || h < 5 ? "night" : h < 8 ? "dawn" : h < 18 ? "day" : "sunset");
@@ -1372,6 +1381,20 @@ function renderJob() {
     ${choices}
     <div class="pay"><span>${t("estPay")}${salaries() ? ` · ${t("salaries", { n: euro(salaries()) })}` : ""}</span><b>${euro(est)}</b></div>
     <div class="job-actions"><button type="button" class="small ghost" data-act="abandon">${t("abandon")}</button></div>`;
+}
+let lineLen = {};
+function avgLine() {
+  if (!lineLen[lang]) { const ls = snippets().join("\n").split("\n").filter(l => l.trim()); lineLen[lang] = ls.reduce((a, l) => a + l.trimStart().length + 1, 0) / Math.max(1, ls.length); }
+  return lineLen[lang];
+}
+function renderAuto() {
+  const b = $("autoBtn"); if (!b) return;
+  b.setAttribute("aria-pressed", S.auto ? "true" : "false");
+  let eta = "";
+  const cps = autoCps() + teamCps();
+  if (S.auto && S.job && cps > 0) { const sec = Math.ceil((S.job.lines - S.job.done) * avgLine() / cps); eta = ` · ${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`; }
+  b.textContent = (S.auto ? "❚❚ " : "▶ ") + t("auto") + eta;
+  b.title = t("autoHint", { n: String(Math.round(autoKps() * 10) / 10).replace(".", lang === "it" ? "," : ".") });
 }
 function updateJobBar() {
   if (!S.job) return;
@@ -2598,6 +2621,7 @@ cv.addEventListener("pointerdown", e => {
 $("editor").addEventListener("pointerdown", e => { if (e.target.closest(".bug, button")) return; if (P.seated) typeChars(perKey(), true); });
 $("typeBtn").addEventListener("click", () => typeChars(perKey(), true));
 $("standBtn").addEventListener("click", standUp);
+$("autoBtn").addEventListener("click", () => { S.auto = !S.auto; toast(t(S.auto ? "autoOn" : "autoOff")); renderAuto(); save(); });
 $("goDesk").addEventListener("click", () => { ensureCtx(); music.ctx && music.ctx.resume(); walkTo(deskOf(0)); });
 $("musicBtn").addEventListener("click", () => setMusic(!music.on));
 $("rainBtn").addEventListener("click", () => {
@@ -2660,7 +2684,9 @@ let last = performance.now(), acc = 0, saveAcc = 0, uiAcc = 0, achAcc = 0;
 function frame(tm) {
   const dt = Math.min(0.1, (tm - last) / 1000); last = tm;
   updatePlayer(dt); updateTeam(dt);
-  acc += teamCps() * dt;
+  const ac = autoCps();
+  acc += (teamCps() + ac) * dt;
+  if (ac > 0) lastType = now();
   if (acc >= 1) { const n = Math.floor(acc); acc -= n; typeChars(n, false); }
   S.clock = (S.clock + dt * 2) % 1440;
   S.boost = Math.max(0, S.boost - dt); S.boostCd = Math.max(0, S.boostCd - dt);
